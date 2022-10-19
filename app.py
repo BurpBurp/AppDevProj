@@ -47,15 +47,23 @@ def login():
         newUser = User(name, email, password)
         try:
             db.session.add(newUser)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except exc.PendingRollbackError:
+                print("Rollback")
+                db.session.rollback()
+                raise
+            finally:
+                db.session.close()
         except exc.IntegrityError:
+            print("Duplicate")
             return "ERROR USER/EMAIL ALREADY EXISTS"
         print(db.session.execute(db.select(User).where(User.role == "user")).scalar().role)
-        session["username"] = name
+        session["id"] = newUser.id
         return redirect(url_for("index"))
     else:
         if "username" in session:
-            print("Session Cached")
+            print(f"Session Cached, {session['id']}")
             return redirect(url_for("index"))
         return render_template("login.html")
 
