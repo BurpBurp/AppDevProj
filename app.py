@@ -6,7 +6,6 @@ from sqlalchemy import exc
 # Flask and DB Init
 app = Flask(__name__)
 
-app.secret_key = 'the random string'
 app.config['SECRET_KEY'] = 'mysecret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///master.db'
 app.config['SESSION_TYPE'] = 'sqlalchemy'
