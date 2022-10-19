@@ -3,7 +3,7 @@ from flask_session import Session
 from database import db
 import os
 import routes.test as test
-import routes.signup as signup
+import routes.crud as crud
 import routes.index as index
 from UserDBModel import User
 from flask_wtf import CSRFProtect
@@ -19,7 +19,7 @@ def create_app():
     csrf = CSRFProtect(app)
     db.init_app(app)
     app.register_blueprint(test.blueprint)
-    app.register_blueprint(signup.blueprint)
+    app.register_blueprint(crud.blueprint)
     app.register_blueprint(index.blueprint)
     Session(app)
     return app
