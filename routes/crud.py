@@ -64,14 +64,14 @@ def update():
         id = args.get("id",None)
         if id:
             user = get_user_by_id(id)
-            role_to_send = currentUser.role
-            if user.id == currentUser.id:
-                role_to_send = "user"
             if user:
-                if sessUsername == user.username or currentUser.role == "admin":
-                    return render_template("update.html",user = user, role=role_to_send, current_user = currentUser)
-                else:
-                    abort(403,"Access Denied")
+                role_to_send = currentUser.role
+                if user.id == currentUser.id:
+                    role_to_send = "user"
+                    if sessUsername == user.username or currentUser.role == "admin":
+                        return render_template("update.html",user = user, role=role_to_send, current_user = currentUser)
+                    else:
+                        abort(403,"Access Denied")
             else:
                 abort(400, "Invalid ID")
         else:
