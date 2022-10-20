@@ -1,23 +1,24 @@
-from flask import Blueprint
+from flask import Blueprint, session
 from database import db
-from UserDBModel import User
+from UserDBModel import *
 from sqlalchemy import select
 
-blueprint = Blueprint("test",__name__,template_folder="templates")
+blueprint = Blueprint("test", __name__, template_folder="templates")
+
 
 def test_add_user():
-    user = User(username="Jon",email="Jon@gmail.com",password="Password")
+    user = User(username="Jon", email="Jon@gmail.com", password="Password")
     db.session.add(user)
     db.session.commit()
 
+
 @blueprint.route("/test")
 def test():
-    user = db.session.execute(select(User)).scalar()
-    if user:
-        return f"name: {user.username}, email: {user.email}, password: {user.password}"
-    else:
-        test_add_user()
-        return "Added User"
-
-
-
+    try:
+        user = HelperUser(get_user_by_username(session["username"]))
+        user.change_username("admin","123")
+        session["username"] = "admin"
+        return session["username"]
+    except Exception as e:
+        print(e)
+        return str(e)
