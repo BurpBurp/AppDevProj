@@ -3,27 +3,34 @@
 {% block head %}
 <title>Update Page</title>
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-
-
 {% endblock %}
 
 {% block main %}
 
 <form action="#" method="post" class="text-center">
-    <input type="password" placeholder="Current Password" name="curPass"><br>
-    <input type="password" placeholder="New Password" name="newPass"><br>
-    <input type="password" placeholder="Re-Type New Password" name="newPassRepeat"><br>
+    <h1>Change Particulars</h1>
+    <h2>{{ user.username }}</h2>
+    {% if (role != 'admin') -%}
+        <input type="password" placeholder="Current Password" name="curPass"><br>
+    {% else -%}
+        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
+    {% endif %}
+    <input type="password" placeholder="New Password" name="newPass" required><br>
+    <input type="password" placeholder="Re-Type New Password" name="newPassRepeat" required><br>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <button name="changeType" value="changePass" type="submit">Change Password</button>
+    <input type="hidden" name="userID" value="{{ user.id }}"/>
+    <button name="changeType" value="changePass" type="submit">Change Password</button><br>
+    </form>
+<form action="#" method="post" class="text-center">
+    {% if (role != 'admin') -%}
+        <input type="password" placeholder="Current Password" name="curPass"><br>
+    {% else -%}
+        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
+    {% endif %}
+    <input type="email" placeholder="Email" name="email" required><br>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type="hidden" name="userID" value="{{ user.id }}"/>
+    <button name="changeType" value="changeEmail" type="submit">Change Email</button>
 </form>
 
 {% endblock %}

@@ -1,7 +1,8 @@
 from flask import Blueprint, request, redirect, render_template, url_for, session, flash, abort
 from sqlalchemy import exc, select, or_, and_
 from database import db
-from UserDBModel import User
+from UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id
+import custom_exceptions
 
 blueprint = Blueprint("crud",__name__,template_folder="templates")
 
@@ -55,37 +56,93 @@ def login():
 @blueprint.route("/update", methods = ["GET","POST"])
 def update():
     if "username" not in session:
-        abort(403, "Need to be Logged in")
-        return render_template("index.html")
+        return redirect(url_for("crud.login"))
+    sessUsername = session["username"]
+    currentUser = get_user_by_username(sessUsername)
     if request.method == "GET":
         args = request.args
         id = args.get("id",None)
         if id:
-            user = db.session.execute(select(User).where(User.id == id)).first()[0]
-            sessUsername = session["username"]
-            currentUser = db.session.execute(select(User).where(User.username == sessUsername)).first()[0]
+            user = get_user_by_id(id)
+            role_to_send = currentUser.role
+            if user.id == currentUser.id:
+                role_to_send = "user"
             if user:
                 if sessUsername == user.username or currentUser.role == "admin":
-                    return render_template("update.html",user = user)
+                    return render_template("update.html",user = user, role=role_to_send, current_user = currentUser)
                 else:
                     abort(403,"Access Denied")
             else:
-                abort(400,"ID not valid")
+                abort(400, "Invalid ID")
         else:
-            abort(400, "No ID Provided")
+            return redirect(url_for("crud.update",id=currentUser.id))
+
 
     else:
-        if changeType := request.form["changeType"]:
-            if changeType == "changePass":
-                user = db.session.execute(select(User).where(User.id == id)).first()[0]
-                curPass = request.form["curPass"]
-            elif changeType == "changeEmail":
-                pass
-            else:
-                return redirect(url_for("update"))
-        else:
-            return redirect(url_for("update"))
-        return "WIP"
+        form = request.form
+        try:
+            userId = form["userID"]
+        except KeyError:
+            abort(400,"Missing form inputs")
+
+        if not (user := get_user_by_id(userId)):
+            abort(400,"User ID not valid")
+            return redirect(url_for("crud.update",id=currentUser.id))
+        user = HelperUser(user)
+
+        role_to_send = currentUser.role
+        if user.get_id() == currentUser.id:
+            role_to_send = "user"
+
+        if not (user.get_username() == session["username"] or currentUser.role == "admin"):
+            abort(403,"Access Denied")
+            return redirect(url_for("index.index"))
+
+        match form["changeType"]:
+            case "changePass":
+
+                try:
+                    old_pass = form["curPass"]
+                    new_pass = form["newPass"]
+                    new_pass_repeat = form["newPassRepeat"]
+                except KeyError:
+                    abort(400, "Missing form inputs")
+                    return redirect(url_for("crud.update",id=currentUser.id))
+
+                try:
+                    user.change_password(old_pass,new_pass,new_pass_repeat,role_to_send)
+                    flash("Password Change Successful")
+                    return redirect(url_for("crud.update"))
+
+                except custom_exceptions.WrongPasswordError:
+                    flash("Entered Password is Wrong")
+                    return redirect(url_for("crud.update"))
+
+                except custom_exceptions.PasswordNotMatchError:
+                    flash("Passwords do not match")
+                    return redirect(url_for("crud.update"))
+
+
+            case "changeEmail":
+
+                try:
+                    old_pass = form["curPass"]
+                    email = form["email"]
+                except KeyError:
+                    abort(400, "Missing form inputs")
+                    return redirect(url_for("crud.update",id=currentUser.id))
+
+                try:
+                    user.change_email(old_pass,email,role_to_send)
+                    flash("Email Change Successful")
+                    return redirect(url_for("crud.update"))
+
+                except custom_exceptions.WrongPasswordError:
+                    flash("Entered Password is Wrong")
+                    return redirect(url_for("crud.update"))
+
+            case other:
+                abort(400,"Bad changeType")
 
 @blueprint.route("/signout", methods=["GET","POST"])
 def signout():

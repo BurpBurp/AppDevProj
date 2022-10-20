@@ -19,6 +19,6 @@ def test():
         user.change_username("admin","123")
         session["username"] = "admin"
         return session["username"]
-    except TypeError as e:
+    except Exception as e:
         print(e)
         return str(e)
