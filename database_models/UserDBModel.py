@@ -58,7 +58,7 @@ class HelperUser():
             db.session.commit()
             return
         else:
-            raise custom_exceptions.WrongPasswordError
+            raise custom_exceptions.WrongPasswordError()
 
     def __change_username(self,username,password):
         if self.__password == password:
@@ -66,6 +66,15 @@ class HelperUser():
             db.session.commit()
         else:
             print("Password wrong")
+
+    def delete_user(self,current_password,role = "user"):
+        if role=="admin":
+            current_password = self.__password
+        if current_password == self.__password:
+            db.session.delete(self.__user)
+            db.session.commit()
+        else:
+            raise custom_exceptions.WrongPasswordError()
 
 def get_user_by_username(name: str) -> User | None:
     user: User = db.session.execute(select(User).where(User.username == name)).first()

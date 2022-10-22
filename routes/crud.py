@@ -61,6 +61,8 @@ def login():
 def update():
     if "username" not in session:
         return redirect(url_for("crud.login"))
+    if not helper_functions.check_logged_in():
+        return redirect(url_for("crud.login"))
     sessUsername = session["username"]
     currentUser = get_user_by_username(sessUsername)
     if request.method == "GET":
@@ -77,7 +79,8 @@ def update():
                 else:
                     abort(403,"Access Denied")
             else:
-                abort(400, "Invalid ID")
+                helper_functions.flash_error(f"User with ID: {id} does not exist")
+                return redirect(url_for("crud.update",id=currentUser.id))
         else:
             return redirect(url_for("crud.update",id=currentUser.id))
 
@@ -90,14 +93,18 @@ def update():
             abort(400,"Missing form inputs")
 
         if not (user := get_user_by_id(userId)):
-            abort(400,"User ID not valid")
+            helper_functions.flash_error(f"User with ID: {userId} does not exist")
             return redirect(url_for("crud.update",id=currentUser.id))
+        print(user)
         user = HelperUser(user)
 
         role_to_send = currentUser.role
+        print(role_to_send)
+        change_self = False
         if user.get_id() == currentUser.id:
+            change_self = True
             role_to_send = "user"
-
+        print(role_to_send)
         if not (user.get_username() == session["username"] or currentUser.role == "admin"):
             abort(403,"Access Denied")
             return redirect(url_for("index.index"))
@@ -110,8 +117,8 @@ def update():
                     new_pass = form["newPass"]
                     new_pass_repeat = form["newPassRepeat"]
                 except KeyError:
-                    abort(400, "Missing form inputs")
-                    return redirect(url_for("crud.update",id=currentUser.id))
+                    helper_functions.flash_error("Missing Form Inputs")
+                    return redirect(url_for("crud.update",id=user.get_id()))
 
                 try:
                     user.change_password(old_pass,new_pass,new_pass_repeat,role_to_send)
@@ -124,7 +131,7 @@ def update():
 
                 except custom_exceptions.PasswordNotMatchError:
                     helper_functions.flash_error("Passwords do not match")
-                    return redirect(url_for("crud.update"))
+                    return redirect(url_for("crud.update",id=user.get_id()))
 
 
             case "changeEmail":
@@ -133,8 +140,8 @@ def update():
                     old_pass = form["curPass"]
                     email = form["email"]
                 except KeyError:
-                    abort(400, "Missing form inputs")
-                    return redirect(url_for("crud.update",id=currentUser.id))
+                    helper_functions.flash_error("Missing Form Inputs")
+                    return redirect(url_for("crud.update",id=user.get_id()))
 
                 try:
                     user.change_email(old_pass,email,role_to_send)
@@ -143,7 +150,25 @@ def update():
 
                 except custom_exceptions.WrongPasswordError:
                     helper_functions.flash_error("Entered Password is Wrong")
+                    return redirect(url_for("crud.update",id=user.get_id()))
+
+            case "deleteAccount":
+                try:
+                    password = form["curPass"]
+                except KeyError:
+                    return redirect(url_for("crud.update",id=user.get_id()))
+
+                try:
+                    user.delete_user(password,role_to_send)
+                except custom_exceptions.WrongPasswordError:
+                    helper_functions.flash_error("Entered Password is Wrong")
                     return redirect(url_for("crud.update"))
+                helper_functions.flash_success("Account Deleted")
+                if change_self:
+                    session.pop("username",None)
+                    return redirect(url_for("index.index"))
+                return redirect(url_for("crud.update",id=currentUser.id))
+
 
             case other:
                 abort(400,"Bad changeType")
