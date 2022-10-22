@@ -1,7 +1,7 @@
-from flask import Blueprint, request, redirect, render_template, url_for, session, flash, abort
+from flask import Blueprint, request, redirect, url_for, session, abort
 from sqlalchemy import exc, select, or_, and_
 from database import db
-from UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id
+from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id
 import custom_exceptions
 import helper_functions
 
@@ -10,9 +10,12 @@ blueprint = Blueprint("crud",__name__,template_folder="templates")
 @blueprint.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
-        password = request.form["password"]
+        try:
+            name = request.form["name"]
+            email = request.form["email"]
+            password = request.form["password"]
+        except KeyError:
+            return redirect(url_for("crud.signup"))
         newUser = User(username=name,email=email,password=password)
         existingUser = db.session.execute(select(User).where(or_(User.username == name, User.email == email))).scalar()
         if not existingUser:

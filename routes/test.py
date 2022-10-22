@@ -1,7 +1,5 @@
 from flask import Blueprint, session
-from database import db
-from UserDBModel import *
-from sqlalchemy import select
+from database_models.UserDBModel import *
 
 blueprint = Blueprint("test", __name__, template_folder="templates")
 

@@ -5,7 +5,6 @@ import os
 import routes.test as test
 import routes.crud as crud
 import routes.index as index
-from UserDBModel import User
 from flask_wtf import CSRFProtect
 
 
