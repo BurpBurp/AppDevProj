@@ -12,7 +12,7 @@
         {% if user %}
           {% if user.role == "admin" %}
             <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'update' else '' }}" href="{{ url_for('crud.update',id=3) }}">Admin</a>
+              <a class="nav-link {{ 'active' if active_page == 'update' else '' }}" href="{{ url_for('crud.update',id=user.id) }}">Admin</a>
             </li>
           {% endif %}
         {% endif %}
