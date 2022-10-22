@@ -22,10 +22,10 @@ def signup():
                 session["username"] = name
                 db.session.close()
             except exc.IntegrityError:
-                flash("User.User already exists")
+                helper_functions.flash_error("User already exists")
                 return helper_functions.helper_render("signup.html")
         else:
-            flash("User.User already exists")
+            helper_functions.flash_error("User already exists")
             return helper_functions.helper_render("signup.html")
         return redirect(url_for("index.index"))
     else:
@@ -42,15 +42,15 @@ def login():
         existingUser = db.session.execute(select(User).where(and_(User.username == name, User.password == password))).scalar()
         if existingUser:
             session["username"] = existingUser.username
-            flash("Logged in Successfully")
+            helper_functions.flash_success("Logged in Successfully")
             return redirect(url_for("index.index"))
         else:
-            flash("Username/Password Wrong")
+            helper_functions.flash_error("Username/Password Wrong")
             return helper_functions.helper_render("login.html")
     else:
         if helper_functions.check_logged_in():
             print(f"Session Cached, {session['username']}")
-            flash("Logged in Successfully")
+            helper_functions.flash_success("Already Logged in")
             return redirect(url_for("index.index"))
         return helper_functions.helper_render("login.html")
 
@@ -112,15 +112,15 @@ def update():
 
                 try:
                     user.change_password(old_pass,new_pass,new_pass_repeat,role_to_send)
-                    flash("Password Change Successful")
+                    helper_functions.flash_success("Password Change Successful")
                     return redirect(url_for("crud.update"))
 
                 except custom_exceptions.WrongPasswordError:
-                    flash("Entered Password is Wrong")
+                    helper_functions.flash_error("Entered Password is Wrong")
                     return redirect(url_for("crud.update"))
 
                 except custom_exceptions.PasswordNotMatchError:
-                    flash("Passwords do not match")
+                    helper_functions.flash_error("Passwords do not match")
                     return redirect(url_for("crud.update"))
 
 
@@ -135,11 +135,11 @@ def update():
 
                 try:
                     user.change_email(old_pass,email,role_to_send)
-                    flash("Email Change Successful")
+                    helper_functions.flash_success("Email Change Successful")
                     return redirect(url_for("crud.update"))
 
                 except custom_exceptions.WrongPasswordError:
-                    flash("Entered Password is Wrong")
+                    helper_functions.flash_error("Entered Password is Wrong")
                     return redirect(url_for("crud.update"))
 
             case other:
@@ -149,5 +149,5 @@ def update():
 def signout():
     if "username" in session:
         session.pop("username",None)
-        helper_functions.helper_flash("Signed Out Successfully")
+        helper_functions.flash_primary("Signed Out Successfully")
     return redirect(url_for("index.index"))

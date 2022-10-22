@@ -1,12 +1,14 @@
-from flask import session, render_template,flash
+from flask import session, render_template, flash
 from UserDBModel import get_user_by_username
 
-def helper_render(template,**kwargs):
+
+def helper_render(template, **kwargs):
     if check_logged_in():
         user = get_user_by_username(session["username"])
         if user:
-            return render_template(template,user=user,**kwargs)
-    return render_template(template,**kwargs)
+            return render_template(template, user=user, **kwargs)
+    return render_template(template, **kwargs)
+
 
 def check_logged_in():
     if "username" in session:
@@ -14,6 +16,14 @@ def check_logged_in():
             return True
     return False
 
-def helper_flash(message,category=None):
-    session.pop("_flashes",None)
-    flash(message,category)
+
+def flash_error(message):
+    flash(message, "error")
+
+
+def flash_success(message):
+    flash(message, "success")
+
+
+def flash_primary(message):
+    flash(message, "none")

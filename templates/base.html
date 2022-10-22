@@ -16,13 +16,20 @@
         {% include 'includes/navbar.html' %}
     </nav>
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul class=flashes>
-            {% for message in messages %}
-              <li>{{ message }}</li>
+            {% for category, message in messages %}
+              {% if category == "success" %}
+                <div class="alert alert-success alert-dismissible" role="alert">
+              {% elif category == "error" %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+              {% else %}
+                <div class="alert alert-primary alert-dismissible" role="alert">
+              {% endif %}
+                {{message}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             {% endfor %}
-            </ul>
         {% endif %}
     {% endwith %}
 
