@@ -5,6 +5,8 @@ import os
 import routes.test as test
 import routes.crud as crud
 import routes.index as index
+from database_models.UserDBModel import User
+from database_models.CartDBModel import Cart
 from flask_wtf import CSRFProtect
 
 
