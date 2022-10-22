@@ -95,16 +95,13 @@ def update():
         if not (user := get_user_by_id(userId)):
             helper_functions.flash_error(f"User with ID: {userId} does not exist")
             return redirect(url_for("crud.update",id=currentUser.id))
-        print(user)
         user = HelperUser(user)
 
         role_to_send = currentUser.role
-        print(role_to_send)
         change_self = False
         if user.get_id() == currentUser.id:
             change_self = True
             role_to_send = "user"
-        print(role_to_send)
         if not (user.get_username() == session["username"] or currentUser.role == "admin"):
             abort(403,"Access Denied")
             return redirect(url_for("index.index"))
@@ -146,7 +143,7 @@ def update():
                 try:
                     user.change_email(old_pass,email,role_to_send)
                     helper_functions.flash_success("Email Change Successful")
-                    return redirect(url_for("crud.update"))
+                    return redirect(url_for("crud.update",id=user.get_id()))
 
                 except custom_exceptions.WrongPasswordError:
                     helper_functions.flash_error("Entered Password is Wrong")
