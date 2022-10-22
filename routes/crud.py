@@ -3,6 +3,7 @@ from sqlalchemy import exc, select, or_, and_
 from database import db
 from UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id
 import custom_exceptions
+import helper_functions
 
 blueprint = Blueprint("crud",__name__,template_folder="templates")
 
@@ -22,16 +23,16 @@ def signup():
                 db.session.close()
             except exc.IntegrityError:
                 flash("User.User already exists")
-                return render_template("signup.html")
+                return helper_functions.helper_render("signup.html")
         else:
             flash("User.User already exists")
-            return render_template("signup.html")
+            return helper_functions.helper_render("signup.html")
         return redirect(url_for("index.index"))
     else:
-        if "username" in session:
+        if helper_functions.check_logged_in():
             print(f"Session Cached, {session['username']}")
             return redirect(url_for("index.index"))
-        return render_template("signup.html")
+        return helper_functions.helper_render("signup.html")
 
 @blueprint.route("/login", methods=["GET", "POST"])
 def login():
@@ -45,13 +46,13 @@ def login():
             return redirect(url_for("index.index"))
         else:
             flash("Username/Password Wrong")
-            return render_template("login.html")
+            return helper_functions.helper_render("login.html")
     else:
-        if "username" in session:
+        if helper_functions.check_logged_in():
             print(f"Session Cached, {session['username']}")
             flash("Logged in Successfully")
             return redirect(url_for("index.index"))
-        return render_template("login.html")
+        return helper_functions.helper_render("login.html")
 
 @blueprint.route("/update", methods = ["GET","POST"])
 def update():
@@ -63,15 +64,15 @@ def update():
         args = request.args
         id = args.get("id",None)
         if id:
-            user = get_user_by_id(id)
-            if user:
+            target_user = get_user_by_id(id)
+            if target_user:
                 role_to_send = currentUser.role
-                if user.id == currentUser.id:
+                if target_user.id == currentUser.id:
                     role_to_send = "user"
-                    if sessUsername == user.username or currentUser.role == "admin":
-                        return render_template("update.html",user = user, role=role_to_send, current_user = currentUser)
-                    else:
-                        abort(403,"Access Denied")
+                if sessUsername == target_user.username or currentUser.role == "admin":
+                    return helper_functions.helper_render("update.html", role=role_to_send, target_user = target_user)
+                else:
+                    abort(403,"Access Denied")
             else:
                 abort(400, "Invalid ID")
         else:
@@ -146,5 +147,7 @@ def update():
 
 @blueprint.route("/signout", methods=["GET","POST"])
 def signout():
-    session.pop("username",None)
+    if "username" in session:
+        session.pop("username",None)
+        helper_functions.helper_flash("Signed Out Successfully")
     return redirect(url_for("index.index"))
