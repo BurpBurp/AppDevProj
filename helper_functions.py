@@ -2,7 +2,7 @@ from flask import session, render_template,flash
 from UserDBModel import get_user_by_username
 
 def helper_render(template,**kwargs):
-    if "username" in session:
+    if check_logged_in():
         user = get_user_by_username(session["username"])
         if user:
             return render_template(template,user=user,**kwargs)
