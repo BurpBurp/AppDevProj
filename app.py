@@ -1,51 +1,35 @@
-from flask import Flask, render_template, redirect, url_for, session, request
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import exc
+from flask import Flask, session
+from flask_session import Session
+from database import db
+import os
+import routes.test as test
+import routes.crud as crud
+import routes.index as index
+from flask_wtf import CSRFProtect
 
-db = SQLAlchemy()
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///master.db'
-db.init_app(app)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String,unique = True, nullable = False)
-    email = db.Column(db.String,unique = True, nullable = False)
-    password = db.Column(db.String,nullable = False)
-    role = db.Column(db.String,default="user")
+def create_app():
+    app = Flask(__name__)
+    app.config["DEBUG"] = True
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///master.db"
+    app.config['SECRET_KEY'] = 'mysecret'
+    app.config['SESSION_TYPE'] = 'sqlalchemy'
+    app.config['SESSION_SQLALCHEMY'] = db
+    csrf = CSRFProtect(app)
+    db.init_app(app)
+    app.register_blueprint(test.blueprint)
+    app.register_blueprint(crud.blueprint)
+    app.register_blueprint(index.blueprint)
+    Session(app)
+    return app
 
-    def __init__(self,username,email,password):
-        self.username = username
-        self.email = email
-        self.password = password
 
-@app.route('/')
-def index():
-    return render_template("index.html")
-
-@app.route("/login", methods = ["GET","POST"])
-def login():
-    if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
-        password = request.form["password"]
-        existingUserByName : User = db.session.execute(db.select(User).where(User.username == name)).scalar()
-        existingUserByEmail : User = db.session.execute(db.select(User).where(User.email == email)).scalar()
-        newUser = User(name,email,password)
-        try:
-            db.session.add(newUser)
-            db.session.commit()
-        except exc.IntegrityError:
-            return "ERROR USER/EMAIL ALREADY EXISTS"
-        print(db.session.execute(db.select(User).where(User.role == "user")).scalar().role)
-        return redirect(url_for("index"))
-    return render_template("login.html")
-
-@app.route("/usr")
-def user(usr):
-    return f"<h1>{usr}</h1>"
-
-if __name__ == '__main__':
+def setup_database(app: Flask):
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+
+if __name__ == "__main__":
+    app: Flask = create_app()
+    if not os.path.isfile('instance/master.db'):
+        setup_database(app)
+    app.run()

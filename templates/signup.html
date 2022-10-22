@@ -1,21 +1,18 @@
 {% extends 'base.html' %}
-{% set active_page = "login" %}
 
 {% block head %}
-<title>Login Page</title>
+<title>Signup Page</title>
 
 
 {% endblock %}
 
 {% block main %}
 <form action="#" method="post" class="text-center">
+    <label>Name: </label>
     <input id="name" type="text" name="name" placeholder="Username" required><br>
+    <input id="email" type="email" name="email" placeholder="Email" required><br>
     <input id="pass" type="password" name="password" placeholder="Password" required><br>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <button type="submit">Submit</button>
 </form>
-<div class="text-center">
-    <a  href="{{ url_for('crud.signup') }}" >Click Here to Create an Account</a>
-</div>
-
 {% endblock %}

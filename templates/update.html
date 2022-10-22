@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% set active_page = "update" %}
+
+{% block head %}
+<title>Update Page</title>
+
+{% endblock %}
+
+{% block main %}
+
+<form action="#" method="post" class="text-center">
+    <h1>Change Particulars</h1>
+    <h2>{{ target_user.username }}</h2>
+    {% if (role != 'admin') -%}
+        <input type="password" placeholder="Current Password" name="curPass"><br>
+    {% else -%}
+        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
+    {% endif %}
+    <input type="password" placeholder="New Password" name="newPass" required><br>
+    <input type="password" placeholder="Re-Type New Password" name="newPassRepeat" required><br>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
+    <button name="changeType" value="changePass" type="submit" class="btn btn-primary">Change Password</button><br>
+    </form>
+<form action="#" method="post" class="text-center">
+    {% if (role != 'admin') -%}
+        <input type="password" placeholder="Current Password" name="curPass"><br>
+    {% else -%}
+        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
+    {% endif %}
+    <input type="email" placeholder="Email" name="email" required><br>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
+    <button name="changeType" value="changeEmail" type="submit" class="btn btn-primary">Change Email</button>
+</form><br>
+<form action="#" method="post" class="text-center">
+    {% if (role != 'admin') -%}
+        <input type="password" placeholder="Current Password" name="curPass"><br>
+    {% else -%}
+        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
+    {% endif %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
+    <button name="changeType" value="deleteAccount" type="submit" class="btn btn-danger">Delete Account</button>
+</form>
+
+{% endblock %}
