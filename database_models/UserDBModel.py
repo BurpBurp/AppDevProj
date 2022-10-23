@@ -90,3 +90,7 @@ def get_user_by_id(id: int) -> User | None:
         return user[0]
     else:
         return None
+
+def get_all_users():
+    users = db.session.execute(select(User)).all()
+    return users

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% set active_page = "admin" %}
+
+{% block head %}
+<title>Index</title>
+{% endblock %}
+
+{% block main %}
+<h1 class="text-center">Users</h1>
+<table class="text-center table">
+  <tr>
+    <th>ID</th>
+    <th>Username</th>
+    <th>Role</th>
+    <th>Update</th>
+  </tr>
+{% if user_list %}
+    {% for target in user_list %}
+        <tr>
+            <td>{{target[0].id}}</td>
+            <td>{{target[0].username}}</td>
+            <td>{{target[0].role}}</td>
+            <td>
+                <form method="get" action="{{url_for('crud.update')}}">
+                    <input type="hidden" name="id" value="{{target[0].id}}">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+{% endif %}
+<tr>
+    <td colspan="4">
+
+    </td>
+</tr>
+</table>
+{% endblock %}

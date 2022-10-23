@@ -5,6 +5,7 @@ import os
 import routes.test as test
 import routes.crud as crud
 import routes.index as index
+import routes.admin as admin
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
 from flask_wtf import CSRFProtect
@@ -22,6 +23,7 @@ def create_app():
     app.register_blueprint(test.blueprint)
     app.register_blueprint(crud.blueprint)
     app.register_blueprint(index.blueprint)
+    app.register_blueprint(admin.blueprint)
     Session(app)
     return app
 

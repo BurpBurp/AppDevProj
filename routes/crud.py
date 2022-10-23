@@ -82,6 +82,7 @@ def update():
                 helper_functions.flash_error(f"User with ID: {id} does not exist")
                 return redirect(url_for("crud.update",id=currentUser.id))
         else:
+            helper_functions.flash_error("No ID Provided")
             return redirect(url_for("crud.update",id=currentUser.id))
 
 
