@@ -18,13 +18,13 @@ def create_app():
     app.config['SECRET_KEY'] = 'mysecret'
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     app.config['SESSION_SQLALCHEMY'] = db
-    csrf = CSRFProtect(app)
-    db.init_app(app)
+    csrf = CSRFProtect(app) # CSRF protect forms
+    db.init_app(app) # Init DB
     app.register_blueprint(test.blueprint)
-    app.register_blueprint(crud.blueprint)
-    app.register_blueprint(index.blueprint)
-    app.register_blueprint(admin.blueprint)
-    Session(app)
+    app.register_blueprint(crud.blueprint) # Register CRUD Routes
+    app.register_blueprint(index.blueprint) # Register index routes
+    app.register_blueprint(admin.blueprint) # Reigster Admin Routes
+    Session(app) # Start Sever Side Sessions
     return app
 
 

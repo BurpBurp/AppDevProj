@@ -50,6 +50,9 @@ class HelperUser():
             raise custom_exceptions.WrongPasswordError("Password Is Wrong")
 
     def change_email(self,current_pass,email,role="user"):
+        if get_user_by_email(email):
+            raise custom_exceptions.RepeatedEmailError()
+
         if role == "admin":
             current_pass = self.__password
         if current_pass == self.__password:
@@ -76,7 +79,7 @@ class HelperUser():
         else:
             raise custom_exceptions.WrongPasswordError()
 
-def get_user_by_username(name: str) -> User | None:
+def get_user_by_username(name: int) -> User | None:
     user: User = db.session.execute(select(User).where(User.username == name)).first()
     if user:
         return user[0]
@@ -86,6 +89,13 @@ def get_user_by_username(name: str) -> User | None:
 
 def get_user_by_id(id: int) -> User | None:
     user = db.session.execute(select(User).where(User.id == str(id))).first()
+    if user:
+        return user[0]
+    else:
+        return None
+
+def get_user_by_email(email: str) -> User | None:
+    user = db.session.execute(select(User).where(User.email == str(email))).first()
     if user:
         return user[0]
     else:

@@ -59,34 +59,36 @@ def login():
 
 @blueprint.route("/update", methods = ["GET","POST"])
 def update():
-    if "username" not in session:
+    if "username" not in session: # If not Logged in
         return redirect(url_for("crud.login"))
-    if not helper_functions.check_logged_in():
+    if not helper_functions.check_logged_in(): # If logged in user exists, aka not deleted
         return redirect(url_for("crud.login"))
-    sessUsername = session["username"]
-    currentUser = get_user_by_username(sessUsername)
-    if request.method == "GET":
-        args = request.args
-        id = args.get("id",None)
-        if id:
-            target_user = get_user_by_id(id)
-            if target_user:
-                role_to_send = currentUser.role
-                if target_user.id == currentUser.id:
+    sessUsername = session["username"] # current username to sessUsername
+    currentUser = get_user_by_username(sessUsername) # get current user db object
+
+    if request.method == "GET": # if get method
+        args = request.args # grab arguments
+        id = args.get("id",None) # grab id
+        if id: # if ID in args
+            target_user = get_user_by_id(id) # try and get user by id
+            if target_user: # if grab user successful
+                role_to_send = currentUser.role # set role to send as current user role.
+                # role_to_send determine if password required for changes to account
+                if target_user.id == currentUser.id: # if updated user is same. Override role to send as user. Forces password to be entered
                     role_to_send = "user"
-                if sessUsername == target_user.username or currentUser.role == "admin":
-                    return helper_functions.helper_render("update.html", role=role_to_send, target_user = target_user)
+                if sessUsername == target_user.username or currentUser.role == "admin": # if not logged as rurrent user or not admin
+                    return helper_functions.helper_render("update.html", role=role_to_send, target_user = target_user) # send to own update page
                 else:
                     abort(403,"Access Denied")
             else:
-                helper_functions.flash_error(f"User with ID: {id} does not exist")
+                helper_functions.flash_error(f"User with ID: {id} does not exist") #if id not valid send to own update page
                 return redirect(url_for("crud.update",id=currentUser.id))
         else:
-            helper_functions.flash_error("No ID Provided")
+            helper_functions.flash_error("No ID Provided") # if id not provided send to own update page
             return redirect(url_for("crud.update",id=currentUser.id))
 
 
-    else:
+    else: # POST method
         form = request.form
         try:
             userId = form["userID"]
@@ -121,11 +123,11 @@ def update():
                 try:
                     user.change_password(old_pass,new_pass,new_pass_repeat,role_to_send)
                     helper_functions.flash_success("Password Change Successful")
-                    return redirect(url_for("crud.update"))
+                    return redirect(url_for("crud.update",id=user.get_id()))
 
                 except custom_exceptions.WrongPasswordError:
                     helper_functions.flash_error("Entered Password is Wrong")
-                    return redirect(url_for("crud.update"))
+                    return redirect(url_for("crud.update",id=user.get_id()))
 
                 except custom_exceptions.PasswordNotMatchError:
                     helper_functions.flash_error("Passwords do not match")
@@ -150,6 +152,10 @@ def update():
                     helper_functions.flash_error("Entered Password is Wrong")
                     return redirect(url_for("crud.update",id=user.get_id()))
 
+                except custom_exceptions.RepeatedEmailError:
+                    helper_functions.flash_error("Email already in use")
+                    return redirect(url_for("crud.update",id=user.get_id()))
+
             case "deleteAccount":
                 try:
                     password = form["curPass"]
@@ -160,15 +166,15 @@ def update():
                     user.delete_user(password,role_to_send)
                 except custom_exceptions.WrongPasswordError:
                     helper_functions.flash_error("Entered Password is Wrong")
-                    return redirect(url_for("crud.update"))
+                    return redirect(url_for("crud.update",id=user.get_id()))
                 helper_functions.flash_success("Account Deleted")
                 if change_self:
                     session.pop("username",None)
                     return redirect(url_for("index.index"))
-                return redirect(url_for("crud.update",id=currentUser.id))
+                return redirect(url_for("admin.admin"))
 
 
-            case other:
+            case _:
                 abort(400,"Bad changeType")
 
 @blueprint.route("/signout", methods=["GET","POST"])

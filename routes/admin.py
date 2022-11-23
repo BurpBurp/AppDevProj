@@ -9,13 +9,18 @@ blueprint = Blueprint("admin",__name__,template_folder="templates")
 
 @blueprint.route("/admin", methods=["GET","POST"])
 def admin():
-    match request.method:
-        case "GET":
-            users = get_all_users()
-            return helper_functions.helper_render("admin.html", user_list = users)
+    if user := get_user_by_username(session.get("username")):
+        if user.role != "admin":
+            helper_functions.flash_error("Permission Denied")
+            return redirect("index.index")
+        else:
+            match request.method:
+                case "GET":
+                    users = get_all_users()
+                    return helper_functions.helper_render("admin.html", user_list = users)
 
-        case "POST":
-            pass
+                case "POST":
+                    pass
 
-
+    return redirect(url_for("crud.login"))
 
