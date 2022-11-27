@@ -1,4 +1,4 @@
-from sqlalchemy import select, exc
+from sqlalchemy import select, exc, func
 from database import db
 import custom_exceptions
 
@@ -12,6 +12,7 @@ class User(db.Model):
     cart_id = db.relationship("Cart", backref="User", uselist=False)
     f_name = db.Column(db.String, nullable=False)
     l_name = db.Column(db.String, nullable=False)
+    date_created = db.Column(db.DateTime(),default=func.now())
 
 
 class HelperUser:
@@ -82,6 +83,15 @@ class HelperUser:
         else:
             raise custom_exceptions.WrongPasswordError()
 
+class UserStats():
+    def init(self):
+        pass
+
+    def get_num_users(self):
+        return len(db.session.execute(select(User)).all())
+
+    def get_num_admins(self):
+        return len(db.session.execute(select(User).where(User.role == "admin")).all())
 
 def get_user_by_username(name: int) -> User | None:
     user: User = db.session.execute(select(User).where(User.username == name)).first()

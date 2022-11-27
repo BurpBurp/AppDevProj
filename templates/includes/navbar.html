@@ -18,9 +18,17 @@
         {% endif %}
       </ul>
       {% if user %}
-          <form class="d-flex" method="get" action="{{ url_for('crud.signout') }}">
-            <button class="btn btn-outline-success" type="submit">Sign Out</button>
-          </form>
+        <div class="dropdown">
+            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user.f_name }} {{ user.l_name }}
+            </a>
+
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <li><a class="dropdown-item" href="{{url_for('crud.update')}}?id={{user.id}}">Edit Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('crud.signout') }}">Signout</a></li>
+            </ul>
+        </div>
       {% else %}
           {% if active_page != 'login' %}
               <form class="d-flex" method="get" action="{{ url_for('crud.login') }}">

@@ -27,4 +27,4 @@ class AdminCreateAccountForm(FlaskForm):
                                      [DataRequired(),
                                       EqualTo("password")])
     role = SelectField("Role", choices=[("user", "User"),("admin", "Admin")])
-    submit = SubmitField("Sign Up")
+    submit = SubmitField("Create Account")
