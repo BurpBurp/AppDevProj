@@ -1,41 +1,33 @@
 from flask import Blueprint, request, redirect, url_for, session, abort
 from sqlalchemy import exc, select, or_, and_
 from database import db
-from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id
+from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id,create_user
 import custom_exceptions
 import helper_functions
+import forms.SignUpForm
 
 blueprint = Blueprint("crud",__name__,template_folder="templates")
 
 @blueprint.route("/signup", methods=["GET", "POST"])
 def signup():
+    form = forms.SignUpForm.SignUpForm()
     if request.method == "POST":
-        try:
-            name = request.form["name"]
-            email = request.form["email"]
-            password = request.form["password"]
-        except KeyError:
-            return redirect(url_for("crud.signup"))
-        newUser = User(username=name,email=email,password=password)
-        existingUser = db.session.execute(select(User).where(or_(User.username == name, User.email == email))).scalar()
-        if not existingUser:
+        if form.validate_on_submit():
             try:
-                db.session.add(newUser)
-                db.session.commit()
-                session["username"] = name
-                db.session.close()
-            except exc.IntegrityError:
-                helper_functions.flash_error("User already exists")
-                return helper_functions.helper_render("signup.html")
+                create_user(form.username.data,form.password.data,form.f_name.data,form.l_name.data,form.email.data)
+                helper_functions.flash_success("Account Created Successfully")
+                session["username"] = form.username.data
+                return redirect(url_for("index.index"))
+            except custom_exceptions.UserAlreadyExistsError:
+                helper_functions.flash_error("User Already Exists")
+                return redirect(url_for("crud.signup"))
         else:
-            helper_functions.flash_error("User already exists")
-            return helper_functions.helper_render("signup.html")
-        return redirect(url_for("index.index"))
+            return helper_functions.helper_render("signup.html",form=form)
     else:
         if helper_functions.check_logged_in():
             print(f"Session Cached, {session['username']}")
             return redirect(url_for("index.index"))
-        return helper_functions.helper_render("signup.html")
+        return helper_functions.helper_render("signup.html",form=form)
 
 @blueprint.route("/login", methods=["GET", "POST"])
 def login():

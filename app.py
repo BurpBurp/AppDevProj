@@ -24,7 +24,7 @@ def create_app():
     app.register_blueprint(crud.blueprint) # Register CRUD Routes
     app.register_blueprint(index.blueprint) # Register index routes
     app.register_blueprint(admin.blueprint) # Reigster Admin Routes
-    Session(app) # Start Sever Side Sessions
+    Session(app) # Start Sever Side Session
     return app
 
 

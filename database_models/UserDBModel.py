@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, exc
 from database import db
 import custom_exceptions
 
@@ -9,11 +9,14 @@ class User(db.Model):
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.String, default="user")
-    cart_id = db.relationship("Cart",backref="User",uselist=False)
+    cart_id = db.relationship("Cart", backref="User", uselist=False)
+    f_name = db.Column(db.String, nullable=False)
+    l_name = db.Column(db.String, nullable=False)
 
-class HelperUser():
-    def __init__(self,user : User):
-        if isinstance(user,User):
+
+class HelperUser:
+    def __init__(self, user: User):
+        if isinstance(user, User):
             self.__user = user
             self.__username = user.username
             self.__password = user.password
@@ -33,8 +36,8 @@ class HelperUser():
     def get_username(self):
         return self.__username
 
-    def change_password(self,old_pass,new_pass,new_pass_repeat,role="user"):
-        print(old_pass,new_pass,new_pass_repeat,role)
+    def change_password(self, old_pass, new_pass, new_pass_repeat, role="user"):
+        print(old_pass, new_pass, new_pass_repeat, role)
         if role == "admin":
             old_pass = self.__password
         if old_pass == self.__password:
@@ -49,7 +52,7 @@ class HelperUser():
         else:
             raise custom_exceptions.WrongPasswordError("Password Is Wrong")
 
-    def change_email(self,current_pass,email,role="user"):
+    def change_email(self, current_pass, email, role="user"):
         if get_user_by_email(email):
             raise custom_exceptions.RepeatedEmailError()
 
@@ -63,21 +66,22 @@ class HelperUser():
         else:
             raise custom_exceptions.WrongPasswordError()
 
-    def __change_username(self,username,password):
+    def __change_username(self, username, password):
         if self.__password == password:
             self.__user.username = username
             db.session.commit()
         else:
             print("Password wrong")
 
-    def delete_user(self,current_password,role = "user"):
-        if role=="admin":
+    def delete_user(self, current_password, role="user"):
+        if role == "admin":
             current_password = self.__password
         if current_password == self.__password:
             db.session.delete(self.__user)
             db.session.commit()
         else:
             raise custom_exceptions.WrongPasswordError()
+
 
 def get_user_by_username(name: int) -> User | None:
     user: User = db.session.execute(select(User).where(User.username == name)).first()
@@ -94,6 +98,7 @@ def get_user_by_id(id: int) -> User | None:
     else:
         return None
 
+
 def get_user_by_email(email: str) -> User | None:
     user = db.session.execute(select(User).where(User.email == str(email))).first()
     if user:
@@ -101,6 +106,16 @@ def get_user_by_email(email: str) -> User | None:
     else:
         return None
 
+
 def get_all_users():
     users = db.session.execute(select(User)).all()
     return users
+
+def create_user(username,password,f_name,l_name,email,role="user"):
+    try:
+        user = User(username=username,password=password,f_name=f_name,l_name=l_name,email=email,role=role)
+        db.session.add(user)
+        db.session.commit()
+    except exc.IntegrityError:
+        db.session.rollback()
+        raise custom_exceptions.UserAlreadyExistsError

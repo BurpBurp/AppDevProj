@@ -21,17 +21,16 @@
             <td>{{target[0].username}}</td>
             <td>{{target[0].role}}</td>
             <td>
-                <form method="get" action="{{url_for('crud.update')}}">
-                    <input type="hidden" name="id" value="{{target[0].id}}">
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </form>
+                <a class="btn btn-primary" role="button" href="{{url_for('crud.update')}}?id={{target[0].id}}">Update</a>
             </td>
         </tr>
     {% endfor %}
 {% endif %}
 <tr>
     <td colspan="4">
-
+        <form method="get" action="#">
+            <button type="submit" name="ChangeType" value="CreateAccount" class="btn btn-primary">Create Account</button>
+        </form>
     </td>
 </tr>
 </table>

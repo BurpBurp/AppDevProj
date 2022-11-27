@@ -16,3 +16,6 @@ class PasswordNotMatchError(UserUpdateError):
 
 class RepeatedEmailError(UserUpdateError):
     pass
+
+class UserAlreadyExistsError(UserUpdateError):
+    pass

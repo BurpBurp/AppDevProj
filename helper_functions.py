@@ -4,7 +4,7 @@ from database_models.UserDBModel import get_user_by_username
 
 def helper_render(template, **kwargs):
     if check_logged_in():
-        user = get_user_by_username(session["username"])
+        user = get_user_by_username(session.get("username"))
         if user:
             return render_template(template, user=user, **kwargs)
     return render_template(template, **kwargs)
