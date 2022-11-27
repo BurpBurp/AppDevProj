@@ -28,9 +28,7 @@
 {% endif %}
 <tr>
     <td colspan="4">
-        <form method="get" action="#">
-            <button type="submit" name="ChangeType" value="CreateAccount" class="btn btn-primary">Create Account</button>
-        </form>
+        <a class="btn btn-primary" role="button" href="{{url_for('admin.admin_create_account')}}">Create Account</a>
     </td>
 </tr>
 </table>

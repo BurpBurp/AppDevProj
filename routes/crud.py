@@ -1,7 +1,7 @@
 from flask import Blueprint, request, redirect, url_for, session, abort
 from sqlalchemy import exc, select, or_, and_
 from database import db
-from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id,create_user
+from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id,create_user, get_user_by_email
 import custom_exceptions
 import helper_functions
 import forms.SignUpForm
@@ -20,11 +20,16 @@ def signup():
                 return redirect(url_for("index.index"))
             except custom_exceptions.UserAlreadyExistsError:
                 helper_functions.flash_error("User Already Exists")
-                return redirect(url_for("crud.signup"))
+                if get_user_by_username(form.username.data):
+                    form.username.errors.append("Username Taken")
+                if get_user_by_email(form.email.data):
+                    form.email.errors.append("Email Taken")
+                return helper_functions.helper_render("signup.html",form=form)
         else:
             return helper_functions.helper_render("signup.html",form=form)
     else:
         if helper_functions.check_logged_in():
+            helper_functions.flash_success("Already Logged in")
             print(f"Session Cached, {session['username']}")
             return redirect(url_for("index.index"))
         return helper_functions.helper_render("signup.html",form=form)
