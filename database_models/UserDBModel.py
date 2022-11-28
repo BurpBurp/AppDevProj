@@ -94,7 +94,7 @@ class UserStats():
         return len(db.session.execute(select(User).where(User.role == "admin")).all())
 
 def get_user_by_username(name: int) -> User | None:
-    user: User = db.session.execute(select(User).where(User.username == name)).first()
+    user: User = db.session.execute(select(User).where(User.username == str(name))).first()
     if user:
         return user[0]
     else:
