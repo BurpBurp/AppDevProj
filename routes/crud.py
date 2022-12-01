@@ -1,10 +1,11 @@
 from flask import Blueprint, request, redirect, url_for, session, abort
 from sqlalchemy import exc, select, or_, and_
 from database import db
-from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id,create_user, get_user_by_email
+from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id,create_user, get_user_by_email, try_login_user
 import custom_exceptions
 import helper_functions
 import forms.SignUpForm
+import forms.LoginForm
 
 blueprint = Blueprint("crud",__name__,template_folder="templates")
 
@@ -36,23 +37,22 @@ def signup():
 
 @blueprint.route("/login", methods=["GET", "POST"])
 def login():
+    form = forms.LoginForm.LoginForm()
     if request.method == "POST":
-        name = request.form["name"]
-        password = request.form["password"]
-        existingUser = db.session.execute(select(User).where(and_(User.username == name, User.password == password))).scalar()
-        if existingUser:
-            session["username"] = existingUser.username
-            helper_functions.flash_success("Logged in Successfully")
-            return redirect(url_for("index.index"))
-        else:
-            helper_functions.flash_error("Username/Password Wrong")
-            return helper_functions.helper_render("login.html")
+        if form.validate_on_submit():
+            if try_login_user(form.username.data,form.password.data):
+                session["username"] = form.username.data
+                helper_functions.flash_success("Logged in Successfully")
+                return redirect(url_for("index.index"))
+            else:
+                helper_functions.flash_error("Username or Password Incorrect")
+                return helper_functions.helper_render("login.html",form=form)
     else:
         if helper_functions.check_logged_in():
             print(f"Session Cached, {session['username']}")
             helper_functions.flash_success("Already Logged in")
             return redirect(url_for("index.index"))
-        return helper_functions.helper_render("login.html")
+        return helper_functions.helper_render("login.html",form=form)
 
 @blueprint.route("/update", methods = ["GET","POST"])
 def update():
@@ -72,8 +72,8 @@ def update():
                 role_to_send = currentUser.role # set role to send as current user role.
                 # role_to_send determine if password required for changes to account
                 if target_user.id == currentUser.id: # if updated user is same. Override role to send as user. Forces password to be entered
-                    role_to_send = "user"
-                if sessUsername == target_user.username or currentUser.role == "admin": # if not logged as rurrent user or not admin
+                    role_to_send = 0
+                if sessUsername == target_user.username or currentUser.role >= 2: # if not logged as current user or not admin
                     return helper_functions.helper_render("update.html", role=role_to_send, target_user = target_user) # send to own update page
                 else:
                     abort(403,"Access Denied")
@@ -99,10 +99,10 @@ def update():
 
         role_to_send = currentUser.role
         change_self = False
-        if user.get_id() == currentUser.id:
+        if user.get_id() <= currentUser.id:
             change_self = True
-            role_to_send = "user"
-        if not (user.get_username() == session["username"] or currentUser.role == "admin"):
+            role_to_send = 0
+        if not (user.get_username() == session["username"] or currentUser.role >= 2):
             abort(403,"Access Denied")
             return redirect(url_for("index.index"))
 

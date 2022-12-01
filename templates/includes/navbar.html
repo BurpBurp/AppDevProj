@@ -10,7 +10,7 @@
           <a class="nav-link {{ 'active' if active_page == 'index' else '' }}" aria-current="page" href="{{ url_for('index.index') }}">Home</a>
         </li>
         {% if user %}
-          {% if user.role == "admin" %}
+          {% if user.role >= 2 %}
             <li class="nav-item">
               <a class="nav-link {{ 'active' if active_page == 'admin' else '' }}" href="{{ url_for('admin.admin') }}">Admin</a>
             </li>

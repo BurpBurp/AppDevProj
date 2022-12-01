@@ -13,7 +13,7 @@ blueprint = Blueprint("admin", __name__, template_folder="templates")
 @blueprint.route("/admin", methods=["GET", "POST"])
 def admin():
     if user := get_user_by_username(session.get("username")):
-        if user.role != "admin":
+        if user.role < 2:
             helper_functions.flash_error("Permission Denied")
             return redirect("index.index")
         else:
@@ -31,7 +31,7 @@ def admin():
 @blueprint.route("/adminCreateAccount", methods=["GET", "POST"])
 def admin_create_account():
     if user := get_user_by_username(session.get("username")):
-        if user.role != "admin":
+        if user.role < 2:
             helper_functions.flash_error("Permission Denied")
             return redirect("index.index")
         else:
@@ -51,8 +51,8 @@ def admin_create_account():
                                 form.username.errors.append("Username Taken")
                             if get_user_by_email(form.email.data):
                                 form.email.errors.append("Email Taken")
-                            return helper_functions.helper_render("signup.html",form=form)
+                            return helper_functions.helper_render("signup.html",form=form,title="Create Account")
                     else:
-                        return helper_functions.helper_render("signup.html",form=form)
+                        return helper_functions.helper_render("signup.html",form=form,title="Create Account")
 
     return redirect(url_for("crud.login"))
