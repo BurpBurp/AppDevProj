@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% set active_page = "" %}
+
+{% block head %}
+<title>404 Not Found</title>
+{% endblock %}
+
+{% block main %}
+<h1>404 Not Found</h1>
+<span><a href="{{ url_for('index.index') }}">Click Here</a> to return to homepage</span>
+{% endblock %}

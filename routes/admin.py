@@ -15,7 +15,7 @@ def admin():
     if user := get_user_by_username(session.get("username")):
         if user.role < 2:
             helper_functions.flash_error("Permission Denied")
-            return redirect("index.index")
+            abort(403)
         else:
             match request.method:
                 case "GET":
@@ -33,7 +33,7 @@ def admin_create_account():
     if user := get_user_by_username(session.get("username")):
         if user.role < 2:
             helper_functions.flash_error("Permission Denied")
-            return redirect("index.index")
+            return redirect(url_for("index.index"))
         else:
             form = forms.SignUpForm.AdminCreateAccountForm()
             match request.method:

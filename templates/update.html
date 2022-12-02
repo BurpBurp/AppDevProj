@@ -11,7 +11,7 @@
 <form action="#" method="post" class="text-center">
     <h1>Change Particulars</h1>
     <h2>{{ target_user.username }}</h2>
-    {% if (role < target_user.role) -%}
+    {% if (role <= target_user.role) -%}
         <input type="password" placeholder="Current Password" name="curPass"><br>
     {% else -%}
         <input type="hidden" name="curPass" value="IGNORE" class="d-none">
@@ -23,7 +23,7 @@
     <button name="changeType" value="changePass" type="submit" class="btn btn-primary">Change Password</button><br>
     </form>
 <form action="#" method="post" class="text-center">
-    {% if (role < target_user.role) -%}
+    {% if (role <= target_user.role) -%}
         <input type="password" placeholder="Current Password" name="curPass"><br>
     {% else -%}
         <input type="hidden" name="curPass" value="IGNORE" class="d-none">
@@ -34,7 +34,7 @@
     <button name="changeType" value="changeEmail" type="submit" class="btn btn-primary">Change Email</button>
 </form><br>
 <form action="#" method="post" class="text-center">
-    {% if (role < target_user.role) -%}
+    {% if (role <= target_user.role) -%}
         <input type="password" placeholder="Current Password" name="curPass"><br>
     {% else -%}
         <input type="hidden" name="curPass" value="IGNORE" class="d-none">

@@ -6,8 +6,9 @@ import routes.test as test
 import routes.crud as crud
 import routes.index as index
 import routes.admin as admin
-from database_models.UserDBModel import User
+from database_models.UserDBModel import User,get_user_by_username
 from database_models.CartDBModel import Cart
+import errors.page_not_found, errors.permission_denied
 from flask_wtf import CSRFProtect
 
 
@@ -24,6 +25,8 @@ def create_app():
     app.register_blueprint(crud.blueprint) # Register CRUD Routes
     app.register_blueprint(index.blueprint) # Register index routes
     app.register_blueprint(admin.blueprint) # Reigster Admin Routes
+    app.register_error_handler(404,errors.page_not_found.page_not_found)
+    app.register_error_handler(403,errors.permission_denied.permission_denied)
     Session(app) # Start Sever Side Session
     return app
 
@@ -31,6 +34,7 @@ def create_app():
 def setup_database(app: Flask):
     with app.app_context():
         db.create_all()
+
 
 if __name__ == "__main__":
     app: Flask = create_app()

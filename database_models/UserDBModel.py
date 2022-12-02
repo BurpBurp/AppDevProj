@@ -143,9 +143,9 @@ def create_user(username,password,f_name,l_name,email,role=0):
         raise custom_exceptions.UserAlreadyExistsError
 
 def try_login_user(username,password):
-    user = db.session.execute(select(User).where(and_(User.username == username, User.password == password))).scalar()
+    user = db.session.execute(select(User).where(and_(User.username == username, User.password == password))).first()
     if user:
         print(user)
-        return user
+        return user[0]
     else:
         return None
