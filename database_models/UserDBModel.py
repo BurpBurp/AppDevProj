@@ -1,9 +1,10 @@
 from sqlalchemy import select, exc, func, and_
 from database import db
 import custom_exceptions
+from flask_login import UserMixin
 
 
-class User(db.Model):
+class User(db.Model,UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
@@ -138,14 +139,14 @@ def create_user(username,password,f_name,l_name,email,role=0):
         user = User(username=username,password=password,f_name=f_name,l_name=l_name,email=email,role=role)
         db.session.add(user)
         db.session.commit()
+        return user
     except exc.IntegrityError:
         db.session.rollback()
         raise custom_exceptions.UserAlreadyExistsError
 
 def try_login_user(username,password):
-    user = db.session.execute(select(User).where(and_(User.username == username, User.password == password))).first()
+    user = User.query.filter_by(username=username,password=password).first()
     if user:
-        print(user)
-        return user[0]
+        return user
     else:
         return None

@@ -8,40 +8,121 @@
 
 {% block main %}
 
-<form action="#" method="post" class="text-center">
-    <h1>Change Particulars</h1>
-    <h2>{{ target_user.username }}</h2>
-    {% if (role <= target_user.role) -%}
-        <input type="password" placeholder="Current Password" name="curPass"><br>
-    {% else -%}
-        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
-    {% endif %}
-    <input type="password" placeholder="New Password" name="newPass" required><br>
-    <input type="password" placeholder="Re-Type New Password" name="newPassRepeat" required><br>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
-    <button name="changeType" value="changePass" type="submit" class="btn btn-primary">Change Password</button><br>
-    </form>
-<form action="#" method="post" class="text-center">
-    {% if (role <= target_user.role) -%}
-        <input type="password" placeholder="Current Password" name="curPass"><br>
-    {% else -%}
-        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
-    {% endif %}
-    <input type="email" placeholder="Email" name="email" required><br>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
-    <button name="changeType" value="changeEmail" type="submit" class="btn btn-primary">Change Email</button>
-</form><br>
-<form action="#" method="post" class="text-center">
-    {% if (role <= target_user.role) -%}
-        <input type="password" placeholder="Current Password" name="curPass"><br>
-    {% else -%}
-        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
-    {% endif %}
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
-    <button name="changeType" value="deleteAccount" type="submit" class="btn btn-danger">Delete Account</button>
-</form>
+<div class="container">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changeNameForm">
+        Update Profile
+    </button>
 
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changePassForm">
+        Change Password
+    </button>
+
+</div>
+
+<div class="modal fade" id="changeNameForm" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form action="#" method="post" class="modal-content" novalidate>
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeNameFormLabel">Update Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body container-fluid">
+                {{ update_name_form.hidden_tag()}}
+                <div class="row g-3">
+                    <div class="form-floating col-md-6">
+                        {% if update_name_form.new_f_name.errors %}
+                            {{ update_name_form.new_f_name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_name_form.new_f_name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_name_form.new_f_name(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_name_form.new_f_name.label }}
+                    </div>
+                    <div class="form-floating col-md-6">
+                        {% if update_name_form.new_l_name.errors %}
+                            {{ update_name_form.new_l_name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_name_form.new_l_name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_name_form.new_l_name(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_name_form.new_l_name.label }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {{ update_name_form.submit(class="btn btn-primary float-end") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="changePassForm" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="#" method="post" class="modal-content" novalidate>
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePassFormLabel">Update Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body container-fluid">
+                {{ update_pass_form.hidden_tag()}}
+                <div class="row g-3">
+                    <div class="form-floating col-md-12">
+                        {% if update_pass_form.current_password.errors %}
+                            {{ update_pass_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_pass_form.current_password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_pass_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_pass_form.current_password.label }}
+                    </div>
+
+                    <div class="form-floating col-md-12">
+                        {% if update_pass_form.new_password.errors %}
+                            {{ update_pass_form.new_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_pass_form.new_password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_pass_form.new_password(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_pass_form.new_password.label }}
+                    </div>
+
+                    <div class="form-floating col-md-12">
+                        {% if update_pass_form.confirm_new_password.errors %}
+                            {{ update_pass_form.confirm_new_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_pass_form.confirm_new_password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_pass_form.confirm_new_password(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_pass_form.confirm_new_password.label }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {{ update_pass_form.submit(class="btn btn-primary float-end") }}
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

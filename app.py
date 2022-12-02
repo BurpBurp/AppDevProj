@@ -8,9 +8,11 @@ import routes.index as index
 import routes.admin as admin
 from database_models.UserDBModel import User,get_user_by_username
 from database_models.CartDBModel import Cart
+import flask_login
 import errors.page_not_found, errors.permission_denied
 from flask_wtf import CSRFProtect
 
+login_manager = flask_login.LoginManager()
 
 def create_app():
     app = Flask(__name__)
@@ -20,6 +22,8 @@ def create_app():
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     app.config['SESSION_SQLALCHEMY'] = db
     csrf = CSRFProtect(app) # CSRF protect forms
+    login_manager.init_app(app) #init flask login
+    login_manager.login_view = "crud.login"
     db.init_app(app) # Init DB
     app.register_blueprint(test.blueprint)
     app.register_blueprint(crud.blueprint) # Register CRUD Routes
@@ -35,6 +39,10 @@ def setup_database(app: Flask):
     with app.app_context():
         db.create_all()
 
+@login_manager.user_loader
+def user_loader(id):
+    user = User.query.filter_by(id = id).first()
+    return user
 
 if __name__ == "__main__":
     app: Flask = create_app()

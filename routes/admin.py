@@ -5,27 +5,27 @@ from database import db
 from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id, get_all_users, create_user, get_user_by_email,UserStats
 import custom_exceptions
 import helper_functions
+import flask_login
 from forms import SignUpForm
 
 blueprint = Blueprint("admin", __name__, template_folder="templates")
 
 
 @blueprint.route("/admin", methods=["GET", "POST"])
+@flask_login.login_required
 def admin():
-    if user := get_user_by_username(session.get("username")):
-        if user.role < 2:
-            helper_functions.flash_error("Permission Denied")
-            abort(403)
-        else:
-            match request.method:
-                case "GET":
-                    users = get_all_users()
-                    return helper_functions.helper_render("admin.html", user_list=users,stats=UserStats())
+    if flask_login.current_user.role < 2:
+        helper_functions.flash_error("Permission Denied")
+        abort(403)
+    else:
+        match request.method:
+            case "GET":
+                users = get_all_users()
+                return helper_functions.helper_render("admin.html", user_list=users,stats=UserStats())
 
-                case "POST":
-                    pass
+            case "POST":
+                pass
 
-    return redirect(url_for("crud.login"))
 
 
 @blueprint.route("/adminCreateAccount", methods=["GET", "POST"])

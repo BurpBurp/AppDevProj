@@ -9,22 +9,22 @@
         <li class="nav-item">
           <a class="nav-link {{ 'active' if active_page == 'index' else '' }}" aria-current="page" href="{{ url_for('index.index') }}">Home</a>
         </li>
-        {% if user %}
-          {% if user.role >= 2 %}
+        {% if current_user.is_authenticated %}
+          {% if current_user.role >= 2 %}
             <li class="nav-item">
               <a class="nav-link {{ 'active' if active_page == 'admin' else '' }}" href="{{ url_for('admin.admin') }}">Admin</a>
             </li>
           {% endif %}
         {% endif %}
       </ul>
-      {% if user %}
+      {% if current_user.is_authenticated %}
         <div class="dropdown dropstart">
             <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ user.f_name }} {{ user.l_name }}
+                {{ current_user.f_name }} {{ current_user.l_name }}
             </a>
 
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item" href="{{url_for('crud.update')}}?id={{user.id}}">Edit Profile</a></li>
+                <li><a class="dropdown-item" href="{{url_for('crud.update')}}?id={{current_user.id}}">Edit Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{{ url_for('crud.signout') }}">Signout</a></li>
             </ul>

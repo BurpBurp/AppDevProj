@@ -7,6 +7,8 @@ import custom_exceptions
 import helper_functions
 import forms.SignUpForm
 import forms.LoginForm
+import forms.UpdateForm
+import flask_login
 
 blueprint = Blueprint("crud",__name__,template_folder="templates")
 
@@ -16,9 +18,9 @@ def signup():
     if request.method == "POST":
         if form.validate_on_submit():
             try:
-                create_user(form.username.data,form.password.data,form.f_name.data,form.l_name.data,form.email.data)
+                user = create_user(form.username.data,form.password.data,form.f_name.data,form.l_name.data,form.email.data)
                 helper_functions.flash_success("Account Created Successfully")
-                session["username"] = form.username.data
+                flask_login.login_user(user)
                 return redirect(url_for("index.index"))
             except custom_exceptions.UserAlreadyExistsError:
                 helper_functions.flash_error("User Already Exists")
@@ -32,7 +34,6 @@ def signup():
     else:
         if helper_functions.check_logged_in():
             helper_functions.flash_success("Already Logged in")
-            print(f"Session Cached, {session['username']}")
             return redirect(url_for("index.index"))
         return helper_functions.helper_render("signup.html",form=form)
 
@@ -41,8 +42,8 @@ def login():
     form = forms.LoginForm.LoginForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            if try_login_user(form.username.data,form.password.data):
-                session["username"] = form.username.data
+            if user := try_login_user(form.username.data,form.password.data):
+                flask_login.login_user(user,remember=form.remember.data)
                 helper_functions.flash_success("Logged in Successfully")
                 return redirect(url_for("index.index"))
             else:
@@ -50,134 +51,40 @@ def login():
                 return helper_functions.helper_render("login.html",form=form)
     else:
         if helper_functions.check_logged_in():
-            print(f"Session Cached, {session['username']}")
             helper_functions.flash_success("Already Logged in")
             return redirect(url_for("index.index"))
         return helper_functions.helper_render("login.html",form=form)
 
 @blueprint.route("/update", methods = ["GET","POST"])
+@flask_login.login_required
 def update():
-    if "username" not in session: # If not Logged in
-        return redirect(url_for("crud.login"))
-    if not helper_functions.check_logged_in(): # If logged in user exists, aka not deleted
-        return redirect(url_for("crud.login"))
-    sessUsername = session["username"] # current username to sessUsername
-    currentUser = get_user_by_username(sessUsername) # get current user db object
+    match request.method:
+        case "GET":
+            if not (target_user := get_user_by_id(request.args.get("id"))):
+                helper_functions.flash_error("Invalid user ID")
+                abort(404)
 
-    if request.method == "GET": # if get method
-        args = request.args # grab arguments
-        id = args.get("id",None) # grab id
-        if id: # if ID in args
-            target_user = get_user_by_id(id) # try and get user by id
-            if target_user: # if grab user successful
-                role_to_send = currentUser.role # set role to send as current user role.
-                # role_to_send determine if password required for changes to account
-                if target_user.id == currentUser.id: # if updated user is same. Override role to send as user. Forces password to be entered
-                    role_to_send = 0
-                if sessUsername == target_user.username or currentUser.role >= 2: # if not logged as current user or not admin
-                    return helper_functions.helper_render("update.html", role=role_to_send, target_user = target_user) # send to own update page
-                else:
-                    abort(403,"Access Denied")
-            else:
-                helper_functions.flash_error(f"User with ID: {id} does not exist") #if id not valid send to own update page
-                return redirect(url_for("crud.update",id=currentUser.id))
-        else:
-            helper_functions.flash_error("No ID Provided") # if id not provided send to own update page
-            return redirect(url_for("crud.update",id=currentUser.id))
+            print(flask_login.current_user.id != target_user.id)
+            print(flask_login.current_user.role < 2)
+            if flask_login.current_user.id != target_user.id and flask_login.current_user.role < 2:
+                helper_functions.flash_error("You do not have permission to do that")
+                abort(403)
 
+            update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"))
+            update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"))
+            update_name_form = forms.UpdateForm.UpdateNameForm(target_user_id=request.args.get("id"))
+            update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"))
 
-    else: # POST method
-        form = request.form
-        try:
-            userId = form["userID"]
-        except KeyError:
-            abort(400,"Missing form inputs")
+            return helper_functions.render_template("update.html",target_user=target_user,update_pass_form=update_pass_form,
+                                                    update_email_form=update_email_form,
+                                                    update_name_form=update_name_form,
+                                                    update_delete_form=update_delete_form)
 
-        if not (user := get_user_by_id(userId)):
-            helper_functions.flash_error(f"User with ID: {userId} does not exist")
-            return redirect(url_for("crud.update",id=currentUser.id))
-        user = HelperUser(user)
-
-        role_to_send = currentUser.role
-        change_self = False
-        if user.get_id() <= currentUser.id:
-            change_self = True
-            role_to_send = 0
-        if not (user.get_username() == session["username"] or currentUser.role >= 2):
-            abort(403,"Access Denied")
-            return redirect(url_for("index.index"))
-
-        match form["changeType"]:
-            case "changePass":
-
-                try:
-                    old_pass = form["curPass"]
-                    new_pass = form["newPass"]
-                    new_pass_repeat = form["newPassRepeat"]
-                except KeyError:
-                    helper_functions.flash_error("Missing Form Inputs")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-                try:
-                    user.change_password(old_pass,new_pass,new_pass_repeat,role_to_send)
-                    helper_functions.flash_success("Password Change Successful")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-                except custom_exceptions.WrongPasswordError:
-                    helper_functions.flash_error("Entered Password is Wrong")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-                except custom_exceptions.PasswordNotMatchError:
-                    helper_functions.flash_error("Passwords do not match")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-
-            case "changeEmail":
-
-                try:
-                    old_pass = form["curPass"]
-                    email = form["email"]
-                except KeyError:
-                    helper_functions.flash_error("Missing Form Inputs")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-                try:
-                    user.change_email(old_pass,email,role_to_send)
-                    helper_functions.flash_success("Email Change Successful")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-                except custom_exceptions.WrongPasswordError:
-                    helper_functions.flash_error("Entered Password is Wrong")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-                except custom_exceptions.RepeatedEmailError:
-                    helper_functions.flash_error("Email already in use")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-            case "deleteAccount":
-                try:
-                    password = form["curPass"]
-                except KeyError:
-                    return redirect(url_for("crud.update",id=user.get_id()))
-
-                try:
-                    user.delete_user(password,role_to_send)
-                except custom_exceptions.WrongPasswordError:
-                    helper_functions.flash_error("Entered Password is Wrong")
-                    return redirect(url_for("crud.update",id=user.get_id()))
-                helper_functions.flash_success("Account Deleted")
-                if change_self:
-                    session.pop("username",None)
-                    return redirect(url_for("index.index"))
-                return redirect(url_for("admin.admin"))
-
-
-            case _:
-                abort(400,"Bad changeType")
-
+        case "POST":
+            pass
 @blueprint.route("/signout", methods=["GET","POST"])
+@flask_login.login_required
 def signout():
-    if "username" in session:
-        session.pop("username",None)
-        helper_functions.flash_primary("Signed Out Successfully")
+    flask_login.logout_user()
+    helper_functions.flash_primary("Signed Out Successfully")
     return redirect(url_for("index.index"))
