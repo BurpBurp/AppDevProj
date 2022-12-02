@@ -17,6 +17,10 @@
         Change Password
     </button>
 
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#changeEmailForm">
+        Change Email
+    </button>
+
 </div>
 
 <div class="modal fade" id="changeNameForm" tabindex="-1">
@@ -66,10 +70,10 @@
 </div>
 
 <div class="modal fade" id="changePassForm" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <form action="#" method="post" class="modal-content" novalidate>
             <div class="modal-header">
-                <h5 class="modal-title" id="changePassFormLabel">Update Profile</h5>
+                <h5 class="modal-title" id="changePassFormLabel">Change Password</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body container-fluid">
@@ -121,6 +125,27 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 {{ update_pass_form.submit(class="btn btn-primary float-end") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="changeEmailForm" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form action="#" method="post" class="modal-content" novalidate>
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeEmailFormLabel">Update Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body container-fluid">
+                {{ update_email_form.hidden_tag()}}
+                <div class="row">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {{ update_email_form.submit(class="btn btn-primary float-end") }}
             </div>
         </form>
     </div>
