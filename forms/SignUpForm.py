@@ -28,3 +28,16 @@ class AdminCreateAccountForm(FlaskForm):
                                       EqualTo("password")])
     role = SelectField("Role", choices=[(0, "User"),(1, "Employee"),(2, "Admin")])
     submit = SubmitField("Create Account")
+
+class EmployeeCreateAccountForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired()])
+    f_name = StringField("First Name", validators=[DataRequired()])
+    l_name = StringField("Last Name", validators=[DataRequired()])
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField("Re-Enter Password",
+                                     validators=
+                                     [DataRequired(),
+                                      EqualTo("password")])
+    role = SelectField("Role", choices=[(0, "User")])
+    submit = SubmitField("Create Account")

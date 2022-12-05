@@ -1,5 +1,5 @@
 from flask import Blueprint, request, redirect, url_for, session, abort
-
+import http
 from sqlalchemy import exc, select, or_, and_
 from database import db
 from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id,create_user, get_user_by_email, try_login_user
@@ -62,26 +62,67 @@ def update():
         case "GET":
             if not (target_user := get_user_by_id(request.args.get("id"))):
                 helper_functions.flash_error("Invalid user ID")
-                abort(404)
+                return abort(http.HTTPStatus.BAD_REQUEST)
 
-            print(flask_login.current_user.id != target_user.id)
-            print(flask_login.current_user.role < 2)
-            if flask_login.current_user.id != target_user.id and flask_login.current_user.role < 2:
+            if not (target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
+                helper_functions.flash_error("You do not have permission to do that")
+                return abort(http.HTTPStatus.FORBIDDEN)
+
+            if flask_login.current_user.id != target_user.id and flask_login.current_user.role < target_user.role:
                 helper_functions.flash_error("You do not have permission to do that")
                 abort(403)
 
-            update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"))
-            update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"))
-            update_name_form = forms.UpdateForm.UpdateNameForm(target_user_id=request.args.get("id"))
-            update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"))
+            if target_user.id == flask_login.current_user.id:
+                update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"))
+                update_name_form = forms.UpdateForm.UpdateNameForm(target_user_id=request.args.get("id"))
+                update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"))
+                update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"))
 
-            return helper_functions.render_template("update.html",target_user=target_user,update_pass_form=update_pass_form,
-                                                    update_email_form=update_email_form,
-                                                    update_name_form=update_name_form,
-                                                    update_delete_form=update_delete_form)
+                return helper_functions.render_template("update.html",target_user=target_user,update_pass_form=update_pass_form,
+                                                        update_email_form=update_email_form,
+                                                        update_name_form=update_name_form,
+                                                        update_delete_form=update_delete_form,
+                                                        update_self=True)
+
+            elif flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2:
+                update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"),current_password="PlaceHolder")
+                update_name_form = forms.UpdateForm.UpdateNameForm(target_user_id=request.args.get("id"))
+                update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"),current_password="PlaceHolder")
+                update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"),current_password="PlaceHolder")
+
+                return helper_functions.render_template("update.html",target_user=target_user,update_pass_form=update_pass_form,
+                                                        update_email_form=update_email_form,
+                                                        update_name_form=update_name_form,
+                                                        update_delete_form=update_delete_form,
+                                                        update_self=False)
 
         case "POST":
-            pass
+            update_pass_form = forms.UpdateForm.UpdatePasswordForm()
+            update_name_form = forms.UpdateForm.UpdateNameForm()
+            update_email_form = forms.UpdateForm.UpdateEmailForm()
+            update_delete_form = forms.UpdateForm.UpdateDeleteForm()
+            if (not (target_user := get_user_by_id(request.form.get("target_user_id")))) and request.method == "POST":
+                helper_functions.flash_error("Invalid user ID")
+                return abort(http.HTTPStatus.BAD_REQUEST)
+
+            if not (target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
+                helper_functions.flash_error("You do not have permission to do that")
+                return abort(http.HTTPStatus.FORBIDDEN)
+
+            if flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2:
+                update_pass_form.current_password.data = "Stuff"
+                update_email_form.current_password.data = "Stuff"
+                update_delete_form.current_password.data = "Stuff"
+
+
+            return str(update_pass_form.current_password.data + update_pass_form.target_user_id.data)
+
+
+
+
+
+
+
 @blueprint.route("/signout", methods=["GET","POST"])
 @flask_login.login_required
 def signout():

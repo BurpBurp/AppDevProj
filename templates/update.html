@@ -21,6 +21,10 @@
         Change Email
     </button>
 
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#changeDeleteForm">
+        Delete Account
+    </button>
+
 </div>
 
 <div class="modal fade" id="changeNameForm" tabindex="-1">
@@ -139,8 +143,33 @@
             </div>
             <div class="modal-body container-fluid">
                 {{ update_email_form.hidden_tag()}}
-                <div class="row">
-
+                <div class="row g-3">
+                    <div class="form-floating col-md-12">
+                        {% if update_email_form.current_password.errors %}
+                            {{ update_email_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_email_form.current_password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_email_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_email_form.current_password.label }}
+                    </div>
+                    <div class="form-floating col-md-12">
+                        {% if update_email_form.new_email.errors %}
+                            {{ update_email_form.new_email(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_email_form.new_email.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_email_form.new_email(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_email_form.new_email.label }}
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -150,4 +179,40 @@
         </form>
     </div>
 </div>
+
+
+<div class="modal fade" id="changeDeleteForm" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form action="#" method="post" class="modal-content" novalidate>
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeDeleteFormLabel">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body container-fluid">
+                {{ update_delete_form.hidden_tag()}}
+                <div class="row g-3">
+                    <div class="form-floating col-md-12">
+                        {% if update_delete_form.current_password.errors %}
+                            {{ update_delete_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in update_delete_form.current_password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ update_delete_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ update_delete_form.current_password.label }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {{ update_delete_form.submit(class="btn btn-danger float-end") }}
+            </div>
+        </form>
+    </div>
+</div>
+<h1>{{ update_self }}</h1>
+<h1>{{ update_pass_form.current_password.data}}</h1>
 {% endblock %}

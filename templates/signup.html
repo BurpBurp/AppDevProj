@@ -11,7 +11,7 @@
     <form action="#" method="POST" novalidate>
         {{ form.hidden_tag() }}
         <fieldset class="form-group row g-3">
-            <legend>Sign Up</legend>
+            <legend>{{ "Create Account" if admin_create else "Sign Up" }}</legend>
             <div class="form-floating col-md-4">
 
 
