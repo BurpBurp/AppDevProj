@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, EmailField, SubmitField, SelectField, BooleanField, HiddenField
+from flask_wtf.file import FileRequired, FileAllowed
+from wtforms import StringField, PasswordField, EmailField, SubmitField, SelectField, BooleanField, HiddenField, FileField
 from wtforms.validators import DataRequired, Email, EqualTo
 
 class UpdatePasswordForm(FlaskForm):
@@ -29,3 +30,9 @@ class UpdateDeleteForm(FlaskForm):
     change_type = HiddenField(default="UpdateDelete")
     current_password = PasswordField("Current Password",validators=[DataRequired()])
     submit = SubmitField("Delete Account")
+
+class UpdateImageForm(FlaskForm):
+    target_user_id = HiddenField()
+    change_type = HiddenField(default="UpdateImage")
+    image = FileField("Upload Image",validators=[FileRequired(),FileAllowed(['jpg', 'png', 'jpeg'])])
+    submit = SubmitField("Change Image")

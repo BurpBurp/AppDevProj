@@ -1,21 +1,22 @@
 from sqlalchemy import select, exc, func, and_
-
+from numbers import Number
 import helper_functions
 from database import db
 import custom_exceptions
 from flask_login import UserMixin
 
 
-class User(db.Model,UserMixin):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    role = db.Column(db.Integer, default=0) # 0 - User, 1 - Employee, 2 - Admin
+    role = db.Column(db.Integer, default=0)  # 0 - User, 1 - Employee, 2 - Admin
     cart_id = db.relationship("Cart", backref="User", uselist=False)
     f_name = db.Column(db.String, nullable=False)
     l_name = db.Column(db.String, nullable=False)
-    date_created = db.Column(db.DateTime(),default=func.now())
+    profile_pic = db.Column(db.String, default="default.png")
+    date_created = db.Column(db.DateTime(), default=func.now())
 
     def get_role_str(self):
         match self.role:
@@ -24,14 +25,14 @@ class User(db.Model,UserMixin):
             case 1:
                 return "Employee"
             case 2:
-                return "Admin"
+                return "Administrator"
 
-    def update_name(self,f_name,l_name):
+    def update_name(self, f_name, l_name):
         self.f_name = f_name
         self.l_name = l_name
         db.session.commit()
 
-    def delete_account(self,current_password):
+    def delete_account(self, current_password):
         if current_password == self.password:
             db.session.delete(self)
             db.session.commit()
@@ -41,7 +42,6 @@ class User(db.Model,UserMixin):
     def admin_delete_user(self):
         db.session.delete(self)
         db.session.commit()
-
 
 
 class HelperUser:
@@ -112,6 +112,7 @@ class HelperUser:
         else:
             raise custom_exceptions.WrongPasswordError()
 
+
 class UserStats():
     def init(self):
         pass
@@ -125,7 +126,8 @@ class UserStats():
     def get_num_admins(self):
         return len(db.session.execute(select(User).where(User.role == 2)).all())
 
-def get_user_by_username(name: int) -> User | None:
+
+def get_user_by_username(name: str) -> User | None:
     user: User = db.session.execute(select(User).where(User.username == str(name))).first()
     if user:
         return user[0]
@@ -133,7 +135,7 @@ def get_user_by_username(name: int) -> User | None:
         return None
 
 
-def get_user_by_id(id: int) -> User | None:
+def get_user_by_id(id: Number) -> User | None:
     user = db.session.execute(select(User).where(User.id == str(id))).first()
     if user:
         return user[0]
@@ -153,9 +155,10 @@ def get_all_users():
     users = db.session.execute(select(User)).all()
     return users
 
-def create_user(username,password,f_name,l_name,email,role=0):
+
+def create_user(username, password, f_name, l_name, email, role=0):
     try:
-        user = User(username=username,password=password,f_name=f_name,l_name=l_name,email=email,role=role)
+        user = User(username=username, password=password, f_name=f_name, l_name=l_name, email=email, role=role)
         db.session.add(user)
         db.session.commit()
         return user
@@ -163,8 +166,9 @@ def create_user(username,password,f_name,l_name,email,role=0):
         db.session.rollback()
         raise custom_exceptions.UserAlreadyExistsError
 
-def try_login_user(username,password):
-    user = User.query.filter_by(username=username,password=password).first()
+
+def try_login_user(username, password):
+    user = User.query.filter_by(username=username, password=password).first()
     if user:
         return user
     else:

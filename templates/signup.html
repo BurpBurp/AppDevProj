@@ -56,11 +56,9 @@
                     {{ form.username(class="form-control form-control-lg",placeholder="a") }}
                 {% endif %}
                 {{ form.username.label(class="") }}
-                <div id="usernameHelp" class="form-text">Username Cannot be Chnaged in the Future</div>
+                <div id="usernameHelp" class="form-text">Username Cannot be Changed in the Future</div>
             </div>
-            <div class="form-group form-floating col-md-12">
-
-
+            <div class="form-group form-floating col-md-12 mt-1 mb-1">
                 {% if form.email.errors %}
                     {{ form.email(class="form-control form-control-lg is-invalid",placeholder="a") }}
                     <div class="invalid-feedback">
@@ -72,6 +70,7 @@
                     {{ form.email(class="form-control form-control-lg",placeholder="a") }}
                 {% endif %}
                 {{ form.email.label(class="") }}
+                <div id="emailHelp" class="form-text g-0"></div>
             </div>
             <div class="form-group form-floating col-md-6">
 
