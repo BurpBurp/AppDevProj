@@ -64,7 +64,7 @@ def update():
                 helper_functions.flash_error("Invalid user ID")
                 return abort(http.HTTPStatus.BAD_REQUEST)
 
-            if not (target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
+            if not (target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role >= 2):
                 helper_functions.flash_error("You do not have permission to do that")
                 return abort(http.HTTPStatus.FORBIDDEN)
 
@@ -85,7 +85,7 @@ def update():
                                                         update_delete_form=update_delete_form,
                                                         update_self=True)
 
-            elif flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2:
+            elif flask_login.current_user.role > target_user.role or flask_login.current_user.role >= 2:
                 update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"),current_password="PlaceHolder")
                 update_name_form = forms.UpdateForm.UpdateNameForm(target_user_id=request.args.get("id"))
                 update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"),current_password="PlaceHolder")
@@ -113,7 +113,7 @@ def update():
                 helper_functions.flash_error("You do not have permission to do that")
                 return abort(http.HTTPStatus.FORBIDDEN)
 
-            if flask_login.current_user.role > target_user.role or (flask_login.current_user.role == 2 and target_user.id != flask_login.current_user.id):
+            if flask_login.current_user.role > target_user.role or (flask_login.current_user.role >= 2 and target_user.id != flask_login.current_user.id):
                 update_pass_form.current_password.data = target_user.password
                 update_email_form.current_password.data = target_user.password
                 update_delete_form.current_password.data = target_user.password

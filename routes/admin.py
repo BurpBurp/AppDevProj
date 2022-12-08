@@ -36,7 +36,7 @@ def admin_create_account():
         helper_functions.flash_error("Permission Denied")
         return redirect(url_for("index.index"))
     else:
-        if flask_login.current_user.role == 2:
+        if flask_login.current_user.role >= 2:
             form = forms.SignUpForm.AdminCreateAccountForm()
         else:
             form = forms.SignUpForm.EmployeeCreateAccountForm()
@@ -64,9 +64,12 @@ def admin_create_account():
 @blueprint.route("/admin_delete_user")
 @flask_login.login_required
 def admin_user_delete():
-    if flask_login.current_user.role < 1:
+    if not (target_user := get_user_by_id(request.args.get("id"))):
+        abort(http.HTTPStatus.BAD_REQUEST)
+    if flask_login.current_user.role < target_user.role and flask_login.current_user.role < 2:
         helper_functions.flash_error("Permission Denied")
         return abort(http.HTTPStatus.FORBIDDEN)
-    if (target_user := get_user_by_id(request.args.get("id"))):
-        target_user.admin_delete_user()
+
+    target_user.admin_delete_user()
+
     return redirect(url_for("admin.admin"))
