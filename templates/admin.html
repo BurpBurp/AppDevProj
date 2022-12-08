@@ -6,32 +6,64 @@
 {% endblock %}
 
 {% block main %}
+{% if user_list %}
 <h1 class="text-center">Users</h1>
 <table class="text-center table">
   <tr>
     <th>ID</th>
+    <th>First Name</th>
+    <th>Last Name</th>
     <th>Username</th>
     <th>Role</th>
     <th>Update</th>
+    <th>Delete</th>
   </tr>
-{% if user_list %}
     {% for target in user_list %}
         <tr>
             <td>{{target[0].id}}</td>
+            <td>{{target[0].f_name}}</td>
+            <td>{{target[0].l_name}}</td>
             <td>{{target[0].username}}</td>
             <td>{{target[0].get_role_str()}}</td>
             <td>
-                <a class="btn btn-primary" role="button" href="{{url_for('crud.update')}}?id={{target[0].id}}">Update</a>
+                <a class="btn btn-warning" role="button" href="{{url_for('crud.update')}}?id={{target[0].id}}">Update</a>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#AdminUserDelete_{{ target[0].id }}">
+                    Delete
+                </button>
             </td>
         </tr>
     {% endfor %}
-{% endif %}
+
 <tr>
-    <td colspan="4">
+    <td colspan="7">
         <a class="btn btn-primary" role="button" href="{{url_for('admin.admin_create_account')}}">Create Account</a>
     </td>
 </tr>
 </table>
+
+{% for target in user_list %}
+    <div class="modal fade" id="AdminUserDelete_{{ target[0].id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form action="{{url_for('admin.admin_user_delete')}}" method="get" class="modal-content" novalidate>
+            <input type="hidden" value="{{target[0].id}}" name="id">
+            <div class="modal-header">
+                <h5 class="modal-title" id="AdminUserDelete_{{ target[0].id }}_label">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body container-fluid">
+                <span>Are you sure you want to delete user {{target[0].username}}</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger">Delete User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
 Number Users: {{ stats.get_num_users()}}
 Number Admins: {{ stats.get_num_admins() }}
+{% endif %}
 {% endblock %}

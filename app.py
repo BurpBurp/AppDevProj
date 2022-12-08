@@ -6,7 +6,7 @@ import routes.test as test
 import routes.crud as crud
 import routes.index as index
 import routes.admin as admin
-from database_models.UserDBModel import User,get_user_by_username
+from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
 import flask_login
 import errors.page_not_found, errors.permission_denied

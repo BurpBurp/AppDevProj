@@ -77,7 +77,8 @@ def update():
                 update_name_form = forms.UpdateForm.UpdateNameForm(target_user_id=request.args.get("id"))
                 update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"))
                 update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"))
-
+                update_name_form.new_f_name.data = target_user.f_name
+                update_name_form.new_l_name.data = target_user.l_name
                 return helper_functions.render_template("update.html",target_user=target_user,update_pass_form=update_pass_form,
                                                         update_email_form=update_email_form,
                                                         update_name_form=update_name_form,
@@ -89,6 +90,9 @@ def update():
                 update_name_form = forms.UpdateForm.UpdateNameForm(target_user_id=request.args.get("id"))
                 update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"),current_password="PlaceHolder")
                 update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"),current_password="PlaceHolder")
+
+                update_name_form.new_f_name.data = target_user.f_name
+                update_name_form.new_l_name.data = target_user.l_name
 
                 return helper_functions.render_template("update.html",target_user=target_user,update_pass_form=update_pass_form,
                                                         update_email_form=update_email_form,
@@ -109,13 +113,29 @@ def update():
                 helper_functions.flash_error("You do not have permission to do that")
                 return abort(http.HTTPStatus.FORBIDDEN)
 
-            if flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2:
-                update_pass_form.current_password.data = "Stuff"
-                update_email_form.current_password.data = "Stuff"
-                update_delete_form.current_password.data = "Stuff"
+            if flask_login.current_user.role > target_user.role or (flask_login.current_user.role == 2 and target_user.id != flask_login.current_user.id):
+                update_pass_form.current_password.data = target_user.password
+                update_email_form.current_password.data = target_user.password
+                update_delete_form.current_password.data = target_user.password
 
-
-            return str(update_pass_form.current_password.data + update_pass_form.target_user_id.data)
+            match request.form.get("change_type"):
+                case "UpdateName":
+                    if update_name_form.validate_on_submit():
+                        target_user.update_name(update_name_form.new_f_name.data,update_name_form.new_l_name.data)
+                        helper_functions.flash_success("Updated Profile Successfully")
+                case "UpdateDelete":
+                    if update_delete_form.validate_on_submit():
+                        try:
+                            target_user.delete_account(update_delete_form.current_password.data)
+                        except custom_exceptions.WrongPasswordError:
+                            helper_functions.flash_error("Wrong Password")
+                            return redirect(url_for("crud.update",id=target_user.id))
+                        if target_user.id == flask_login.current_user.id:
+                            helper_functions.flash_success("Account Deleted Successfully")
+                            return redirect(url_for("index.index"))
+                        else:
+                            helper_functions.flash_success("Account Deleted Successfully")
+                            return redirect(url_for("admin.admin"))
 
 
 

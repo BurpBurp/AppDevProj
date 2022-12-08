@@ -83,20 +83,21 @@
             <div class="modal-body container-fluid">
                 {{ update_pass_form.hidden_tag()}}
                 <div class="row g-3">
-                    <div class="form-floating col-md-12">
-                        {% if update_pass_form.current_password.errors %}
-                            {{ update_pass_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
-                            <div class="invalid-feedback">
-                                {% for error in update_pass_form.current_password.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ update_pass_form.current_password(class="form-control form-control-lg",placeholder="a") }}
-                        {% endif %}
-                        {{ update_pass_form.current_password.label }}
-                    </div>
-
+                    {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                        <div class="form-floating col-md-12">
+                            {% if update_pass_form.current_password.errors %}
+                                {{ update_pass_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_pass_form.current_password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_pass_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_pass_form.current_password.label }}
+                        </div>
+                    {% endif %}
                     <div class="form-floating col-md-12">
                         {% if update_pass_form.new_password.errors %}
                             {{ update_pass_form.new_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
@@ -144,19 +145,21 @@
             <div class="modal-body container-fluid">
                 {{ update_email_form.hidden_tag()}}
                 <div class="row g-3">
-                    <div class="form-floating col-md-12">
-                        {% if update_email_form.current_password.errors %}
-                            {{ update_email_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
-                            <div class="invalid-feedback">
-                                {% for error in update_email_form.current_password.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ update_email_form.current_password(class="form-control form-control-lg",placeholder="a") }}
-                        {% endif %}
-                        {{ update_email_form.current_password.label }}
-                    </div>
+                    {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                        <div class="form-floating col-md-12">
+                            {% if update_email_form.current_password.errors %}
+                                {{ update_email_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_email_form.current_password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_email_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_email_form.current_password.label }}
+                        </div>
+                    {% endif %}
                     <div class="form-floating col-md-12">
                         {% if update_email_form.new_email.errors %}
                             {{ update_email_form.new_email(class="form-control form-control-lg is-invalid",placeholder="a") }}
@@ -191,19 +194,23 @@
             <div class="modal-body container-fluid">
                 {{ update_delete_form.hidden_tag()}}
                 <div class="row g-3">
-                    <div class="form-floating col-md-12">
-                        {% if update_delete_form.current_password.errors %}
-                            {{ update_delete_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
-                            <div class="invalid-feedback">
-                                {% for error in update_delete_form.current_password.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ update_delete_form.current_password(class="form-control form-control-lg",placeholder="a") }}
-                        {% endif %}
-                        {{ update_delete_form.current_password.label }}
-                    </div>
+                    {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                        <div class="form-floating col-md-12">
+                            {% if update_delete_form.current_password.errors %}
+                                {{ update_delete_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_delete_form.current_password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_delete_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_delete_form.current_password.label }}
+                        </div>
+                    {% else %}
+                        <span>Are you sure you want to delete {{target_user.username}}?</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="modal-footer">
@@ -213,6 +220,4 @@
         </form>
     </div>
 </div>
-<h1>{{ update_self }}</h1>
-<h1>{{ update_pass_form.current_password.data}}</h1>
 {% endblock %}

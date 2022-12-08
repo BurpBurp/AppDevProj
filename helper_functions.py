@@ -1,5 +1,4 @@
 from flask import session, render_template, flash
-from database_models.UserDBModel import get_user_by_username
 import flask_login
 
 

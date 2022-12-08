@@ -1,5 +1,6 @@
 from flask import Blueprint, request, redirect, url_for, session, abort
 from sqlalchemy import exc, select, or_, and_
+import http
 import forms.SignUpForm
 from database import db
 from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id, get_all_users, create_user, get_user_by_email,UserStats
@@ -59,3 +60,13 @@ def admin_create_account():
                 else:
                     return helper_functions.helper_render("signup.html",form=form,title="Create Account",admin_create=True)
 
+
+@blueprint.route("/admin_delete_user")
+@flask_login.login_required
+def admin_user_delete():
+    if flask_login.current_user.role < 1:
+        helper_functions.flash_error("Permission Denied")
+        return abort(http.HTTPStatus.FORBIDDEN)
+    if (target_user := get_user_by_id(request.args.get("id"))):
+        target_user.admin_delete_user()
+    return redirect(url_for("admin.admin"))

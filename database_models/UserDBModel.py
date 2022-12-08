@@ -1,4 +1,6 @@
 from sqlalchemy import select, exc, func, and_
+
+import helper_functions
 from database import db
 import custom_exceptions
 from flask_login import UserMixin
@@ -23,6 +25,23 @@ class User(db.Model,UserMixin):
                 return "Employee"
             case 2:
                 return "Admin"
+
+    def update_name(self,f_name,l_name):
+        self.f_name = f_name
+        self.l_name = l_name
+        db.session.commit()
+
+    def delete_account(self,current_password):
+        if current_password == self.password:
+            db.session.delete(self)
+            db.session.commit()
+        else:
+            raise custom_exceptions.WrongPasswordError("Passwords Dont Match")
+
+    def admin_delete_user(self):
+        db.session.delete(self)
+        db.session.commit()
+
 
 
 class HelperUser:
