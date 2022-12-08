@@ -2,6 +2,7 @@ from flask import Flask, session
 from flask_session import Session
 from database import db
 import os
+import Mail
 import routes.test as test
 import routes.crud as crud
 import routes.index as index
@@ -21,6 +22,12 @@ def create_app():
     app.config['SECRET_KEY'] = 'mysecret'
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     app.config['SESSION_SQLALCHEMY'] = db
+    app.config['MAIL_SERVER']='smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465
+    app.config['MAIL_USERNAME'] = 'khwaresappdev@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'rggiwzpuikfcinpq'
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = True
     csrf = CSRFProtect(app) # CSRF protect forms
     login_manager.init_app(app) #init flask login
     login_manager.login_view = "crud.login"
@@ -32,6 +39,7 @@ def create_app():
     app.register_error_handler(404,errors.page_not_found.page_not_found)
     app.register_error_handler(403,errors.permission_denied.permission_denied)
     Session(app) # Start Sever Side Session
+    Mail.mail.init_app(app)
     return app
 
 
