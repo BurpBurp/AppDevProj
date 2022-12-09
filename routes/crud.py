@@ -158,12 +158,11 @@ def update():
                     if update_image_form.validate_on_submit():
                         if update_image_form.image.data:
                             file_name = f"{secrets.token_urlsafe(8)}{os.path.splitext(secure_filename(update_image_form.image.data.filename))[1]}"
-                            img = update_image_form.image.data.stream.read()
-                            with open(f"static/profiles/{file_name}","wb") as toWrite:
-                                toWrite.write(img)
+                            path = os.path.join("static","profiles",file_name)
+                            update_image_form.image.data.save(path)
                             try:
                                 if target_user.profile_pic != "default.png":
-                                    os.remove(f"static/profiles/{target_user.profile_pic}")
+                                    os.remove(os.path.join("static","profiles",target_user.profile_pic))
                             except IOError:
                                 pass
                             target_user.profile_pic = file_name

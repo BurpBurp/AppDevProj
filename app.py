@@ -56,11 +56,13 @@ def register_errors(app: Flask):
     app.register_error_handler(404, errors.page_not_found.page_not_found)
     app.register_error_handler(403, errors.permission_denied.permission_denied)
 
+
 def register_blueprints(app: Flask):
-    app.register_blueprint(test.blueprint) # Register Test Route
+    app.register_blueprint(test.blueprint)  # Register Test Route
     app.register_blueprint(crud.blueprint)  # Register CRUD Routes
     app.register_blueprint(index.blueprint)  # Register index routes
-    app.register_blueprint(admin.blueprint)  # Reigster Admin Routes
+    app.register_blueprint(admin.blueprint)  # Register Admin Routes
+
 
 def setup_database(app: Flask):
     with app.app_context():
