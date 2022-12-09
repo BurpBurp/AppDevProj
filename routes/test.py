@@ -12,7 +12,7 @@ blueprint = Blueprint("test", __name__, template_folder="templates")
 
 @blueprint.route("/test")
 def test():
-    pass
+    return render_template("navbar-2.html")
     # print("Received GET")
     # msg = Message(subject="Testing", recipients=["dphxdarwin@gmail.com"])
     # msg.attach("logo.png", 'image/png', data=open("static/Logo.png", "rb").read(), disposition="inline",

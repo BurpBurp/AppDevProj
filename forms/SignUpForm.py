@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
 
 class SignUpForm(FlaskForm):
-    username = StringField("Username (Case-Sensitive)", validators=[DataRequired(),Regexp("^\S*$",message="Username cannot contain spaces")])
+    username = StringField("Username", validators=[DataRequired(),Regexp("^\S*$",message="Username cannot contain spaces")])
     f_name = StringField("First Name", validators=[DataRequired()])
     l_name = StringField("Last Name", validators=[DataRequired()])
     email = EmailField("Email", validators=[DataRequired(), Email()])

@@ -55,6 +55,8 @@ def login():
             else:
                 helper_functions.flash_error("Username or Password Incorrect")
                 return helper_functions.helper_render("login.html", form=form)
+        else:
+            return helper_functions.helper_render("login.html", form=form)
     else:
         if helper_functions.check_logged_in():
             helper_functions.flash_success("Already Logged in")
@@ -127,7 +129,8 @@ def update():
                 helper_functions.flash_error("Invalid user ID")
                 return abort(http.HTTPStatus.BAD_REQUEST)
 
-            if not (target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
+            if not (
+                    target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
                 helper_functions.flash_error("You do not have permission to do that")
                 return abort(http.HTTPStatus.FORBIDDEN)
 
@@ -151,18 +154,18 @@ def update():
                                 target_user.profile_pic = "default.png"
                                 print("Stuff")
                                 helper_functions.flash_success("Changed Profile Picture Successfully")
-                                return redirect(url_for("crud.update",id=target_user.id))
+                                return redirect(url_for("crud.update", id=target_user.id))
                         except IOError:
                             pass
 
                     if update_image_form.validate_on_submit():
                         if update_image_form.image.data:
                             file_name = f"{secrets.token_urlsafe(8)}{os.path.splitext(secure_filename(update_image_form.image.data.filename))[1]}"
-                            path = os.path.join("static","profiles",file_name)
+                            path = os.path.join("static", "profiles", file_name)
                             update_image_form.image.data.save(path)
                             try:
                                 if target_user.profile_pic != "default.png":
-                                    os.remove(os.path.join("static","profiles",target_user.profile_pic))
+                                    os.remove(os.path.join("static", "profiles", target_user.profile_pic))
                             except IOError:
                                 pass
                             target_user.profile_pic = file_name
@@ -184,7 +187,8 @@ def update():
                             helper_functions.flash_success("Account Deleted Successfully")
                             return redirect(url_for("admin.admin"))
 
-            return redirect(url_for("crud.update",id=target_user.id))
+            return redirect(url_for("crud.update", id=target_user.id))
+
 
 @blueprint.route("/signout", methods=["GET", "POST"])
 @flask_login.login_required
