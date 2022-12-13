@@ -3,7 +3,6 @@ import os.path
 from flask import session, render_template, flash
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-from PIL import Image
 import secrets
 import flask_login
 

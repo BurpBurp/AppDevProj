@@ -1,4 +1,4 @@
-from sqlalchemy import select, ForeignKey
+from sqlalchemy import select, ForeignKey, ARRAY
 from database import db
 from database_models.UserDBModel import User
 import custom_exceptions
@@ -16,6 +16,8 @@ class Item(db.Model):
     name = db.Column(db.String,nullable=False)
     price = db.Column(db.Float,nullable=False)
     description = db.Column(db.String)
+    quantity = db.Column(db.Integer, nullable=False, default=0)
+    images = db.Column(db.PickleType,default=[])
     category = db.Column(db.String)
 
 

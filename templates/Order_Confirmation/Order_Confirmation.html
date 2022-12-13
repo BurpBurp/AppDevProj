@@ -158,28 +158,16 @@
 					<td>Price</td>
 				</tr>
 
-				<tr class="item">
-					<td>Website design</td>
 
-					<td>$300.00</td>
-				</tr>
-
-				<tr class="item">
-					<td>Hosting (3 months)</td>
-
-					<td>$75.00</td>
-				</tr>
-
-				<tr class="item last">
-					<td>Domain name (1 year)</td>
-
-					<td>$10.00</td>
-				</tr>
-
+				{% for item in items %}
+                    <tr class="items">
+                        <td>{{item[0]}}</td>
+                        <td>{{item[1]*item[2]}}</td>
+                    </tr>
+                {% endfor %}
 				<tr class="total">
 					<td></td>
-
-					<td>Total: $385.00</td>
+					<td>Total: {{total}}</td>
 				</tr>
 			</table>
 		</div>

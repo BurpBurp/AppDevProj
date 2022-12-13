@@ -7,7 +7,6 @@ import secrets
 from werkzeug.utils import secure_filename
 import forms.SignUpForm
 import forms.UpdateForm
-from PIL import Image
 import helper_functions
 from database_models.UserDBModel import get_user_by_username, get_user_by_id, create_user, \
     get_user_by_email, try_login_user
