@@ -1,16 +1,30 @@
-import http
-import flask_login
+import sqlalchemy.exc
 from flask import Blueprint, request, redirect, url_for, abort
-import custom_exceptions
-import forms.LoginForm
+import flask_login
+import http
+
+
 import secrets
 from werkzeug.utils import secure_filename
+
+import forms.LoginForm
 import forms.SignUpForm
 import forms.UpdateForm
+
+import custom_exceptions
 import helper_functions
+
 from database_models.UserDBModel import get_user_by_username, get_user_by_id, create_user, \
-    get_user_by_email, try_login_user
+    get_user_by_email, try_login_user, User
+
 import os
+
+# importing db modules
+from database import db
+
+# importing mail modules
+import mail
+from flask_mail import Message
 
 blueprint = Blueprint("crud", __name__, template_folder="templates")
 
@@ -145,6 +159,28 @@ def update():
                         target_user.update_name(update_name_form.new_f_name.data, update_name_form.new_l_name.data)
                         helper_functions.flash_success("Updated Profile Successfully")
 
+                case "UpdateEmail":
+                    if update_email_form.validate_on_submit():
+                        try:
+                            target_user.update_email(update_email_form.current_password.data,update_email_form.new_email.data)
+                            helper_functions.flash_success("Changed Email Successfully")
+                        except custom_exceptions.WrongPasswordError:
+                            helper_functions.flash_error("Wrong Password")
+                            return redirect(url_for("crud.update", id=target_user.id))
+
+                case "UpdatePassword":
+                    if not (target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
+                        helper_functions.flash_error("You do not have permission to do that")
+                        return redirect(url_for("crud.update", id=target_user.id))
+                    else:
+                        if update_email_form.validate_on_submit():
+                            try:
+                                target_user.update_password(update_pass_form.current_password.data,update_pass_form.new_password.data,update_pass_form.confirm_new_password.data)
+                                helper_functions.flash_success("Changed Password Successfully")
+                            except custom_exceptions.WrongPasswordError:
+                                helper_functions.flash_error("Wrong Password")
+                                return redirect(url_for("crud.update", id=target_user.id))
+
                 case "UpdateImage":
                     if request.form.get("RemoveImage"):
                         try:
@@ -179,6 +215,7 @@ def update():
                         except custom_exceptions.WrongPasswordError:
                             helper_functions.flash_error("Wrong Password")
                             return redirect(url_for("crud.update", id=target_user.id))
+
                         if target_user.id == flask_login.current_user.id:
                             helper_functions.flash_success("Account Deleted Successfully")
                             return redirect(url_for("index.index"))
@@ -188,6 +225,67 @@ def update():
 
             return redirect(url_for("crud.update", id=target_user.id))
 
+
+@blueprint.route("/request_password_reset",methods=["POST"])
+@flask_login.login_required
+def request_password_reset():
+    token = secrets.token_urlsafe(16)
+    flask_login.current_user.reset_token = token
+    url = "http://localhost:5000" + url_for("crud.reset_password",token=token)
+    print(f"<a href='{url}'>"
+          f"{url}"
+          f"</a>")
+    msg = Message(subject="Reset Password Request",recipients=[flask_login.current_user.email],sender=("KHWares","khwaresappdev@gmail.com"))
+    msg.body = url
+    try:
+        mail.mail.send(msg)
+    except Exception as e:
+        print(e)
+        abort(http.HTTPStatus.INTERNAL_SERVER_ERROR)
+    return "Test"
+
+@blueprint.route("/reset_password/<token>",methods=["GET","POST"])
+@flask_login.login_required
+def reset_password(token):
+    if flask_login.current_user.reset_token == token:
+
+        match request.method:
+            case "GET":
+                user = User.query.filter_by(reset_token=token).first()
+                if user:
+                    form = forms.UpdateForm.UpdatePasswordForm()
+                    return helper_functions.helper_render("reset_password.html",form=form)
+                else:
+                    helper_functions.flash_error("BAD REQUEST")
+                    return redirect(url_for("index.index"))
+            case "POST":
+                form = forms.UpdateForm.UpdatePasswordForm()
+                user = User.query.filter_by(reset_token=token).first()
+                if user:
+                    if form.validate_on_submit():
+                        try:
+                            user.update_password(form.current_password.data,form.new_password.data,form.confirm_new_password.data)
+                            try:
+                                user.reset_token = ""
+                                db.session.commit()
+                            except sqlalchemy.exc.SQLAlchemyError:
+                                pass
+                            helper_functions.flash_success("Changed Password Successfully")
+                            return redirect(url_for("index.index"))
+                        except custom_exceptions.WrongPasswordError:
+                            form.current_password.errors.append("Incorrect Password")
+                            helper_functions.flash_error("Wrong Password")
+                        except custom_exceptions.PasswordNotMatchError:
+                            form.new_password.errors.append("Passwords do not match")
+                            form.confirm_new_password.errors.append("Passwords do not match")
+                            helper_functions.flash_error("Passwords do not match")
+                    return redirect(url_for("crud.reset_password",token))
+                else:
+                    helper_functions.flash_error("BAD REQUEST")
+                    return redirect(url_for("index.index"))
+    else:
+        helper_functions.flash_error("Invalid Token")
+        return redirect(url_for("index.index"))
 
 @blueprint.route("/signout", methods=["GET", "POST"])
 @flask_login.login_required

@@ -36,3 +36,6 @@ class UpdateImageForm(FlaskForm):
     change_type = HiddenField(default="UpdateImage")
     image = FileField("Upload Image",validators=[FileRequired(),FileAllowed(['jpg', 'png', 'jpeg'])])
     submit = SubmitField("Change Image")
+
+class ResetPasswordForm(FlaskForm):
+    target_user_id = HiddenField()

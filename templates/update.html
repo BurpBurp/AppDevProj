@@ -2,9 +2,40 @@
 {% set active_page = "update" %}
 
 {% block head %}
-<title>Update Page</title>
+    <title>Update Page</title>
 
-<link rel="stylesheet" href="{{url_for('static', filename='css/profile-pic-change.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/profile-pic-change.css')}}">
+
+    {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+        <script>
+            $(document).ready(function(){
+              $("#changePassButton").click(function(){
+                $.post({url: "{{ url_for('crud.request_password_reset') }}",
+                    success: function(result){
+                    $("#changePassForm").modal('show')
+                    console.log(result);
+                    },
+                    error: function(result){
+                        $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
+                            An Error Has Occured. Please Try Again
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`)
+                        console.log("FAIL");
+                    }
+                });
+              });
+            });
+
+            var $loading = $('#loadingDiv').hide();
+            $(document)
+            .ajaxStart(function () {
+                $loading.show();
+            })
+            .ajaxStop(function () {
+                $loading.hide();
+            });
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block main %}
@@ -29,9 +60,16 @@
                     Update Profile
                 </button>
 
-                <button type="button" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changePassForm">
-                    Change Password
-                </button>
+                {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                    <button type="button" id="changePassButton" class="btn btn-primary col-xl-2 col-md-12 m-2">
+                        Change Password
+                    </button>
+                {% else %}
+                    <button type="button" id="changePassButton" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changePassForm">
+                        Change Password
+                    </button>
+                {% endif %}
+
 
                 <button type="button" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeEmailForm">
                     Change Email
@@ -99,7 +137,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="changePassForm" tabindex="-1">
+    {% if ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+        <div class="modal fade" id="changePassForm" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <form action="#" method="post" class="modal-content" novalidate>
                 <div class="modal-header">
@@ -160,6 +199,24 @@
             </form>
         </div>
     </div>
+    {% else %}
+        <div class="modal fade" id="changePassForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePassFormLabel">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    A Reset Link Has Been Sent to your email.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="modal fade" id="changeEmailForm" tabindex="-1">
         <div class="modal-dialog modal-lg">

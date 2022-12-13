@@ -7,3 +7,4 @@ blueprint = Blueprint("InventoryManagement", __name__, template_folder="template
 @blueprint.route("/ManageInventory")
 def ManageInventory():
     pass
+

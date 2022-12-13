@@ -12,9 +12,10 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.Integer, default=0)  # 0 - User, 1 - Employee, 2 - Admin
-    cart_id = db.relationship("Cart", backref="User", uselist=False)
+    cart = db.relationship("Cart", backref="user", uselist=False)
     f_name = db.Column(db.String, nullable=False)
     l_name = db.Column(db.String, nullable=False)
+    reset_token = db.Column(db.String)
     profile_pic = db.Column(db.String, default="default.png")
     date_created = db.Column(db.DateTime(), default=func.now())
 
@@ -31,6 +32,20 @@ class User(db.Model, UserMixin):
         self.f_name = f_name
         self.l_name = l_name
         db.session.commit()
+
+    def update_email(self, current_password, email):
+        if current_password == self.password:
+            self.email = email
+            db.session.commit()
+        else:
+            raise custom_exceptions.WrongPasswordError("Passwords Dont Match")
+
+    def update_password(self,current_password,new_password,confirm_password):
+        if current_password == self.password:
+            self.password = new_password
+            db.session.commit()
+        else:
+            raise custom_exceptions.WrongPasswordError("Passwords Dont Match")
 
     def delete_account(self, current_password):
         if current_password == self.password:
