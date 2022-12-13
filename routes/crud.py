@@ -2,6 +2,7 @@ import sqlalchemy.exc
 from flask import Blueprint, request, redirect, url_for, abort
 import flask_login
 import http
+import time
 
 
 import secrets
@@ -158,6 +159,11 @@ def update():
                     if update_name_form.validate_on_submit():
                         target_user.update_name(update_name_form.new_f_name.data, update_name_form.new_l_name.data)
                         helper_functions.flash_success("Updated Profile Successfully")
+                    else:
+                        for field in update_name_form.errors:
+                            field = getattr(update_name_form,field)
+                            for error in field.errors:
+                                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
 
                 case "UpdateEmail":
                     if update_email_form.validate_on_submit():
@@ -167,19 +173,30 @@ def update():
                         except custom_exceptions.WrongPasswordError:
                             helper_functions.flash_error("Wrong Password")
                             return redirect(url_for("crud.update", id=target_user.id))
+                    else:
+                        for field in update_email_form.errors:
+                            field = getattr(update_email_form,field)
+                            for error in field.errors:
+                                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
 
                 case "UpdatePassword":
                     if not (target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
                         helper_functions.flash_error("You do not have permission to do that")
                         return redirect(url_for("crud.update", id=target_user.id))
                     else:
-                        if update_email_form.validate_on_submit():
+                        if update_pass_form.validate_on_submit():
                             try:
                                 target_user.update_password(update_pass_form.current_password.data,update_pass_form.new_password.data,update_pass_form.confirm_new_password.data)
                                 helper_functions.flash_success("Changed Password Successfully")
                             except custom_exceptions.WrongPasswordError:
                                 helper_functions.flash_error("Wrong Password")
                                 return redirect(url_for("crud.update", id=target_user.id))
+                        
+                        else:
+                            for field in update_pass_form.errors:
+                                field = getattr(update_pass_form,field)
+                                for error in field.errors:
+                                    helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
 
                 case "UpdateImage":
                     if request.form.get("RemoveImage"):
@@ -192,6 +209,13 @@ def update():
                                 return redirect(url_for("crud.update", id=target_user.id))
                         except IOError:
                             pass
+                    else:
+                        for field in update_pass_form.errors:
+                            field = getattr(update_pass_form,field)
+                            for error in field.errors:
+                                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
+
+
 
                     if update_image_form.validate_on_submit():
                         if update_image_form.image.data:
@@ -222,6 +246,11 @@ def update():
                         else:
                             helper_functions.flash_success("Account Deleted Successfully")
                             return redirect(url_for("admin.admin"))
+                    else:
+                        for field in update_delete_form.errors:
+                            field = getattr(update_delete_form,field)
+                            for error in field.errors:
+                                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
 
             return redirect(url_for("crud.update", id=target_user.id))
 
@@ -243,6 +272,7 @@ def request_password_reset():
         print(e)
         abort(http.HTTPStatus.INTERNAL_SERVER_ERROR)
     return "Test"
+
 
 @blueprint.route("/reset_password/<token>",methods=["GET","POST"])
 @flask_login.login_required
