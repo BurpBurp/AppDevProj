@@ -28,9 +28,9 @@
 <body class="d-flex flex-column min-vh-100">
     <div class="loader d-none loadingDiv"></div>
     <div id="loadingDiv" class="d-none loadingDiv"></div>
-    <nav>
-        {% include 'includes/navbar-2.html' %}
-    </nav>
+
+    {% include 'includes/navbar-2.html' %}
+
     <div id="flashes">
       {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
