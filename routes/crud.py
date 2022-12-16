@@ -65,7 +65,8 @@ def login():
             if user := try_login_user(form.username.data, form.password.data):
                 flask_login.login_user(user, remember=form.remember.data)
                 helper_functions.flash_success("Logged in Successfully")
-                return redirect(url_for("index.index"))
+                next_url = request.args.get("next")
+                return redirect(next_url or url_for("index.index"))
             else:
                 helper_functions.flash_error("Username or Password Incorrect")
                 return helper_functions.helper_render("login.html", form=form)

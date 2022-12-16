@@ -3,14 +3,14 @@
     <div class="container-fluid d-block">
         
         <div class="row justify-content-center">
-                <a class="col-sm-12 col-md-auto text-center offset-md-4 offset-md-5 navbar-brand" href="{{ '#' if active_page == 'index' else url_for('index.index') }}">
+                <a class="col-sm-12 col-md-12 col-lg-4 text-center offset-lg-4 navbar-brand" href="{{ '#' if active_page == 'index' else url_for('index.index') }}">
                     <img src="{{ url_for('static', filename='profiles/default.png') }}" alt="" width="50" height="50" class="d-inline" >
                     <h1 class="d-inline m-0 align-middle">KH Wares</h1>
                 </a>
                 <div class="col-auto ms-auto my-auto">
                     {% if not current_user.is_authenticated %}
                         <a href="{{ url_for('crud.login' )}}" class="btn btn-primary align-middle" role="button">Login</a>
-                        <a href="{{ url_for('crud.login' )}}" class="btn btn-secondary align-middle" role="button">Sign Up</a>
+                        <a href="{{ url_for('crud.signup' )}}" class="btn btn-secondary align-middle" role="button">Sign Up</a>
                     {% else %}
                         <div class="dropstart bg-secondary text-light p-1 rounded mt-auto">
                             <div class="dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">

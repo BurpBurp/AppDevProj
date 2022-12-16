@@ -35,6 +35,7 @@
       {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
               {% for category, message in messages %}
+              
                 {% if category == "success" %}
                   <div class="alert alert-success alert-dismissible" role="alert">
                 {% elif category == "error" %}
@@ -42,6 +43,7 @@
                 {% else %}
                   <div class="alert alert-primary alert-dismissible" role="alert">
                 {% endif %}
+
                   {{message}}
                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
