@@ -2,46 +2,331 @@
 {% set active_page = "update" %}
 
 {% block head %}
-<title>Update Page</title>
+    <title>Update Page</title>
 
+    <link rel="stylesheet" href="{{url_for('static', filename='css/profile-pic-change.css')}}">
+
+    {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+        <script>
+            $(document).ready(function(){
+              $("#changePassButton").click(function(){
+                $.post({url: "{{ url_for('crud.request_password_reset') }}",
+                    success: function(result){
+                    $("#changePassForm").modal('show')
+                    console.log(result);
+                    },
+                    error: function(result){
+                        $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
+                            An Error Has Occured. Please Try Again
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`)
+                        console.log("FAIL");
+                    }
+                });
+              });
+            });
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block main %}
 
-<form action="#" method="post" class="text-center">
-    <h1>Change Particulars</h1>
-    <h2>{{ target_user.username }}</h2>
-    {% if (role != 'admin') -%}
-        <input type="password" placeholder="Current Password" name="curPass"><br>
-    {% else -%}
-        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
-    {% endif %}
-    <input type="password" placeholder="New Password" name="newPass" required><br>
-    <input type="password" placeholder="Re-Type New Password" name="newPassRepeat" required><br>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
-    <button name="changeType" value="changePass" type="submit" class="btn btn-primary">Change Password</button><br>
-    </form>
-<form action="#" method="post" class="text-center">
-    {% if (role != 'admin') -%}
-        <input type="password" placeholder="Current Password" name="curPass"><br>
-    {% else -%}
-        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
-    {% endif %}
-    <input type="email" placeholder="Email" name="email" required><br>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
-    <button name="changeType" value="changeEmail" type="submit" class="btn btn-primary">Change Email</button>
-</form><br>
-<form action="#" method="post" class="text-center">
-    {% if (role != 'admin') -%}
-        <input type="password" placeholder="Current Password" name="curPass"><br>
-    {% else -%}
-        <input type="hidden" name="curPass" value="IGNORE" class="d-none">
-    {% endif %}
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type="hidden" name="userID" value="{{ target_user.id }}"/>
-    <button name="changeType" value="deleteAccount" type="submit" class="btn btn-danger">Delete Account</button>
-</form>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-xxl-2 container-fluid">
+            <div class="hovereffect" style="height:200px; width:200px;">
+                <img src="{{ url_for('static', filename='profiles/' + target_user.profile_pic) }}" width="200" height="200" class="rounded-circle img-responsive">
+                <button type="button" class="info rounded-circle" href="#" style="height:200px; width:200px;" data-bs-toggle="modal" data-bs-target="#changeImageForm">Change Picture</button>
+            </div>
+        </div>
+        <div class="col-md-12 col-xxl-10 container-fluid">
+            <div class="row-justify-content-start mb-5">
+                <h1 class="d-inline">{{ target_user.f_name }} {{ target_user.l_name }}</h1>
+                <h4 class="d-inline ms-4">Aka. {{ target_user.username }}</h4>
+                <h5> {{target_user.get_role_str() }}</h5>
+                <h6> {{target_user.email }}</h6>
+            </div>
+            <div class="row justify-content-start gx-2 mt-5">
+                <button type="button" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeNameForm">
+                    Update Profile
+                </button>
 
+                {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                    <button type="button" id="changePassButton" class="btn btn-primary col-xl-2 col-md-12 m-2">
+                        Change Password
+                    </button>
+                {% else %}
+                    <button type="button" id="changePassButton" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changePassForm">
+                        Change Password
+                    </button>
+                {% endif %}
+
+
+                <button type="button" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeEmailForm">
+                    Change Email
+                </button>
+
+                <button type="button" class="btn btn-danger col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeDeleteForm">
+                    Delete Account
+                </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+</div>
+
+<div class="container-fluid">
+    <div class="modal fade" id="changeNameForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form action="#" method="post" class="modal-content" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeNameFormLabel">Update Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    {{ update_name_form.hidden_tag()}}
+                    <div class="row g-3">
+                        <div class="form-floating col-md-6">
+                            {% if update_name_form.new_f_name.errors %}
+                                {{ update_name_form.new_f_name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_name_form.new_f_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_name_form.new_f_name(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_name_form.new_f_name.label }}
+                        </div>
+                        <div class="form-floating col-md-6">
+                            {% if update_name_form.new_l_name.errors %}
+                                {{ update_name_form.new_l_name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_name_form.new_l_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_name_form.new_l_name(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_name_form.new_l_name.label }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    {{ update_name_form.submit(class="btn btn-primary float-end") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+        <div class="modal fade" id="changePassForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form action="#" method="post" class="modal-content" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePassFormLabel">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    {{ update_pass_form.hidden_tag()}}
+                    <div class="row g-3">
+                        {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                            <div class="form-floating col-md-12">
+                                {% if update_pass_form.current_password.errors %}
+                                    {{ update_pass_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in update_pass_form.current_password.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ update_pass_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                                {% endif %}
+                                {{ update_pass_form.current_password.label }}
+                            </div>
+                        {% endif %}
+                        <div class="form-floating col-md-12">
+                            {% if update_pass_form.new_password.errors %}
+                                {{ update_pass_form.new_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_pass_form.new_password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_pass_form.new_password(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_pass_form.new_password.label }}
+                        </div>
+
+                        <div class="form-floating col-md-12">
+                            {% if update_pass_form.confirm_new_password.errors %}
+                                {{ update_pass_form.confirm_new_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_pass_form.confirm_new_password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_pass_form.confirm_new_password(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_pass_form.confirm_new_password.label }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    {{ update_pass_form.submit(class="btn btn-primary float-end") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+        <div class="modal fade" id="changePassForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePassFormLabel">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    A Reset Link Has Been Sent to your email.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="modal fade" id="changeEmailForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form action="#" method="post" class="modal-content" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeEmailFormLabel">Update Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    {{ update_email_form.hidden_tag()}}
+                    <div class="row g-3">
+                        {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                            <div class="form-floating col-md-12">
+                                {% if update_email_form.current_password.errors %}
+                                    {{ update_email_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in update_email_form.current_password.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ update_email_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                                {% endif %}
+                                {{ update_email_form.current_password.label }}
+                            </div>
+                        {% endif %}
+                        <div class="form-floating col-md-12">
+                            {% if update_email_form.new_email.errors %}
+                                {{ update_email_form.new_email(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                <div class="invalid-feedback">
+                                    {% for error in update_email_form.new_email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ update_email_form.new_email(class="form-control form-control-lg",placeholder="a") }}
+                            {% endif %}
+                            {{ update_email_form.new_email.label }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    {{ update_email_form.submit(class="btn btn-primary float-end") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="changeDeleteForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form action="#" method="post" class="modal-content" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeDeleteFormLabel">Delete Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    {{ update_delete_form.hidden_tag()}}
+                    <div class="row g-3">
+                        {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                            <div class="form-floating col-md-12">
+                                {% if update_delete_form.current_password.errors %}
+                                    {{ update_delete_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in update_delete_form.current_password.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ update_delete_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                                {% endif %}
+                                {{ update_delete_form.current_password.label }}
+                            </div>
+                        {% else %}
+                            <span>Are you sure you want to delete {{target_user.username}}?</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    {{ update_delete_form.submit(class="btn btn-danger float-end") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="changeImageForm" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form action="#" method="post" class="modal-content" enctype="multipart/form-data" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeImageFormLabel">Change Profile Picture</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    {{ update_image_form.hidden_tag()}}
+                    <div class="row justify-content-center g-3">
+                        <img id="imagePreview" src="{{ url_for('static', filename='profiles/default.png') }}" style="height:300px; width:300px !important;" class="text-center rounded-circle"/>
+                        {{ update_image_form.image.label(class="custom-file-upload btn-primary btn") }}
+                        {{ update_image_form.image(class="btn btn-primary", onchange="uploadFile(event)", accept=".png, .jpg, .jpeg")}}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning" data-bs-dismiss="modal" value="noImage" name="RemoveImage">Remove Image</button>
+                    {{ update_image_form.submit(class="btn btn-primary float-end") }}
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  var uploadFile = function(event) {
+    var imagePreview = document.getElementById('imagePreview');
+    imagePreview.src = URL.createObjectURL(event.target.files[0]);
+  };
+</script>
 {% endblock %}

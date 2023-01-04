@@ -1,18 +1,122 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Signup Page</title>
+<title>{{ title if title else "Create an Account" }}</title>
 
 
 {% endblock %}
 
 {% block main %}
-<form action="#" method="post" class="text-center">
-    <label>Name: </label>
-    <input id="name" type="text" name="name" placeholder="Username" required><br>
-    <input id="email" type="email" name="email" placeholder="Email" required><br>
-    <input id="pass" type="password" name="password" placeholder="Password" required><br>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <button type="submit">Submit</button>
-</form>
+<div class="container justify-content-center min-vh-100 d-flex align-items-center">
+    <div class="container w-auto">
+        <div class="row justify-content-center">
+            <form action="#" method="POST" novalidate class="justify-content-center col-md-6 shadow-lg rounded p-5">
+                {{ form.hidden_tag() }}
+                <img src="{{ url_for('static',filename='Logo.png') }}" alt="" width="200">
+                <fieldset class="form-group row g-3">
+                    <legend>{{ "Create Account" if admin_create else "Sign Up" }}</legend>
+                    <div class="form-floating col-md-6">
+
+
+                        {% if form.f_name.errors %}
+                            {{ form.f_name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.f_name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.f_name(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.f_name.label }}
+                    </div>
+                    <div class="form-group form-floating col-md-6">
+
+
+                        {% if form.l_name.errors %}
+                            {{ form.l_name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.l_name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.l_name(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.l_name.label(class="") }}
+                    </div>
+                    <div class="form-group form-floating col-md-12">
+
+
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.username(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.username.label(class="") }}
+                        <div id="usernameHelp" class="form-text">Username Cannot be Changed in the Future</div>
+                    </div>
+                    <div class="form-group form-floating col-md-12 mt-1 mb-1">
+                        {% if form.email.errors %}
+                            {{ form.email(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.email.label(class="") }}
+                        <div id="emailHelp" class="form-text g-0"></div>
+                    </div>
+                    <div class="form-group form-floating col-md-12">
+
+
+                        {% if form.password.errors %}
+                            {{ form.password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.password(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.password.label(class="") }}
+                    </div>
+                    <div class="form-group form-floating col-md-12">
+
+
+                        {% if form.confirm_password.errors %}
+                            {{ form.confirm_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.confirm_password.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.confirm_password(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.confirm_password.label(class="") }}
+                    </div>
+                    {% if form.role %}
+                        <div class="form-floating">
+                            {{ form.role(class="form-select form-control-lg") }}
+                            {{ form.role.label }}
+                        </div>
+                    {% endif %}
+                </fieldset>
+                <fieldset class="row mt-3 justify-content-end pt-5">
+                    <div class="col"> {{ form.submit(class="btn btn-primary float-end") }}</div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

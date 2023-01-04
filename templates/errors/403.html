@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% set active_page = "" %}
+
+{% block head %}
+<title>403 Permission Denied</title>
+{% endblock %}
+
+{% block main %}
+<h1>403 Permission Denied</h1>
+<span><a href="{{ url_for('index.index') }}">Click Here</a> to return to homepage</span>
+{% endblock %}
