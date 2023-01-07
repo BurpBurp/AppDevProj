@@ -47,6 +47,11 @@ class User(db.Model, UserMixin):
             db.session.commit()
         else:
             raise custom_exceptions.WrongPasswordError("Passwords Dont Match")
+    
+    def admin_update_password(self,new_password,confirm_password):
+        self.password = generate_password_hash(new_password)
+        db.session.commit()
+
 
     def delete_account(self, current_password):
         if check_password_hash(self.password,current_password):
@@ -57,6 +62,10 @@ class User(db.Model, UserMixin):
 
     def admin_delete_user(self):
         db.session.delete(self)
+        db.session.commit()
+
+    def admin_update_role(self,role):
+        self.role = role
         db.session.commit()
 
 

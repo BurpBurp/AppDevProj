@@ -27,6 +27,53 @@
             });
         </script>
     {% endif %}
+    {% if ((current_user.role >= 2) and (not update_self)) %}
+        <script>
+            $(document).ready(function(){
+                $("#changeRoleSubmitButton").click(function(e){
+                    e.preventDefault()
+                    console.log($("#target_user_id").val())
+                    $.post({url: 
+                        "/update_role"
+                        ,data: {
+                        role: $("#role").val(),
+                        target_user_id: $("#target_user_id").val(),
+                        csrf_token: $("#csrf_token").val(),
+                    },
+                        success: function(result){
+                        $("#changeRoleForm").modal('hide')
+                        $("#flashes").append(`<div class="alert alert-success alert-dismissible" role="alert">
+                            Changed Role Successfully
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`)
+                        $("#roletext").html(result)
+                        console.log(result);
+                        },
+                        error: function(result){
+                            switch (result.status) {
+                                case 403:
+                                    msg = "Permission Denied"
+                                    break;
+                                case 500:
+                                    msg = "An Error Occurred! Please Try Again"
+                                    break;
+                                case 400:
+                                    msg = "Bad Request! Invalid User ID"
+                                    break;
+                                default:
+                                    msg = "An Error Occurred! Please Try Again"
+                            }
+                            $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
+                                ${msg}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>`)
+                            console.log(result.status);
+                        }
+                    });
+                });
+            });
+        </script>       
+    {% endif %}
 {% endblock %}
 
 {% block main %}
@@ -43,7 +90,7 @@
             <div class="row-justify-content-start mb-5">
                 <h1 class="d-inline">{{ target_user.f_name }} {{ target_user.l_name }}</h1>
                 <h4 class="d-inline ms-4">Aka. {{ target_user.username }}</h4>
-                <h5> {{target_user.get_role_str() }}</h5>
+                <h5 id="roletext"> {{target_user.get_role_str() }}</h5>
                 <h6> {{target_user.email }}</h6>
             </div>
             <div class="row justify-content-start gx-2 mt-5">
@@ -61,14 +108,21 @@
                     </button>
                 {% endif %}
 
-
                 <button type="button" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeEmailForm">
                     Change Email
                 </button>
 
+                {% if ((current_user.role >= 2) and (not update_self)) %}
+                    <button type="button" id="changeRoleButton" class="btn btn-warning col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeRoleForm">
+                        Change Role
+                    </button>
+                {% endif %}
+
                 <button type="button" class="btn btn-danger col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeDeleteForm">
                     Delete Account
                 </button>
+
+
                 </div>
 
             </div>
@@ -319,7 +373,45 @@
             </form>
         </div>
     </div>
+
+    {% if ((current_user.role >= 2) and (not update_self)) %}
+        <div class="modal fade" id="changeRoleForm" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <form method="post" class="modal-content" novalidate>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changeRoleFormLabel">Change Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body container-fluid">
+                        {{ update_role_form.hidden_tag()}}
+                        <div class="row g-3">
+                            <div class="form-floating col-md-12">
+                                {% if update_role_form.role.errors %}
+                                    {{ update_role_form.role(class="form-control form-control-lg is-invalid",placeholder="a",id="role") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in update_role_form.role.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ update_role_form.role(class="form-control form-control-lg",placeholder="a",id="role") }}
+                                {% endif %}
+                                {{ update_role_form.role.label }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="changeRoleSubmitButton">Change Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
 </div>
+
+
+
 {% endblock %}
 
 {% block scripts %}
