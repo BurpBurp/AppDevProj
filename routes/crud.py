@@ -7,6 +7,7 @@ import time
 
 import secrets
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import forms.LoginForm
 import forms.SignUpForm
@@ -36,7 +37,7 @@ def signup():
     if request.method == "POST":
         if form.validate_on_submit():
             try:
-                user = create_user(form.username.data, form.password.data, form.f_name.data, form.l_name.data,
+                user = create_user(form.username.data, generate_password_hash(form.password.data), form.f_name.data, form.l_name.data,
                                    form.email.data)
                 helper_functions.flash_success("Account Created Successfully")
                 flask_login.login_user(user)
@@ -266,7 +267,9 @@ def request_password_reset():
           f"{url}"
           f"</a>")
     msg = Message(subject="Reset Password Request",recipients=[flask_login.current_user.email],sender=("KHWares","khwaresappdev@gmail.com"))
-    msg.body = url
+    msg.body = f"""You have requested a password reset for your KH Wares account
+Click Here: {url} to reset your password
+If you did not request this, Ignore this message. No changes will be made."""
     try:
         mail.mail.send(msg)
     except Exception as e:
@@ -310,7 +313,8 @@ def reset_password(token):
                             form.new_password.errors.append("Passwords do not match")
                             form.confirm_new_password.errors.append("Passwords do not match")
                             helper_functions.flash_error("Passwords do not match")
-                    return redirect(url_for("crud.reset_password",token))
+                    form = forms.UpdateForm.UpdatePasswordForm()
+                    return helper_functions.helper_render("reset_password.html",form=form)
                 else:
                     helper_functions.flash_error("BAD REQUEST")
                     return redirect(url_for("index.index"))
