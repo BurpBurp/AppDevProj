@@ -1,5 +1,5 @@
 import sqlalchemy.exc
-from flask import Blueprint, request, redirect, url_for, abort
+from flask import Blueprint, request, redirect, url_for, abort, jsonify
 import flask_login
 import http
 import time
@@ -7,6 +7,7 @@ import time
 
 import secrets
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import forms.LoginForm
 import forms.SignUpForm
@@ -29,6 +30,27 @@ from flask_mail import Message
 
 blueprint = Blueprint("crud", __name__, template_folder="templates")
 
+@blueprint.route("/update_role", methods=["POST"])
+@flask_login.login_required
+@helper_functions.admin_required
+def update_role():
+    if flask_login.current_user.role < 2:
+        return abort(http.HTTPStatus.FORBIDDEN)
+
+    form = forms.UpdateForm.UpdateRoleForm()
+    if not (target_user := get_user_by_id(form.target_user_id.data)):
+        helper_functions.flash_error("Bad User ID")
+        print(form.target_user_id.data)
+        return abort(http.HTTPStatus.BAD_REQUEST)
+
+    if flask_login.current_user.role < 2:
+        return abort(http.HTTPStatus.FORBIDDEN)
+
+    try:
+        target_user.admin_update_role(form.role.data)
+        return jsonify(target_user.get_role_str())
+    except sqlalchemy.exc.SQLAlchemyError:
+        return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR)
 
 @blueprint.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -36,7 +58,7 @@ def signup():
     if request.method == "POST":
         if form.validate_on_submit():
             try:
-                user = create_user(form.username.data, form.password.data, form.f_name.data, form.l_name.data,
+                user = create_user(form.username.data, generate_password_hash(form.password.data), form.f_name.data, form.l_name.data,
                                    form.email.data)
                 helper_functions.flash_success("Account Created Successfully")
                 flask_login.login_user(user)
@@ -125,13 +147,14 @@ def update():
 
                 update_name_form.new_f_name.data = target_user.f_name
                 update_name_form.new_l_name.data = target_user.l_name
-
+                update_role_form = forms.UpdateForm.UpdateRoleForm(target_user_id=request.args.get("id"),role=target_user.role)
                 return helper_functions.render_template("update.html", target_user=target_user,
                                                         update_pass_form=update_pass_form,
                                                         update_email_form=update_email_form,
                                                         update_name_form=update_name_form,
                                                         update_delete_form=update_delete_form,
                                                         update_image_form=update_image_form,
+                                                        update_role_form=update_role_form,
                                                         update_self=False)
 
         case "POST":
@@ -187,7 +210,7 @@ def update():
                     else:
                         if update_pass_form.validate_on_submit():
                             try:
-                                target_user.update_password(update_pass_form.current_password.data,update_pass_form.new_password.data,update_pass_form.confirm_new_password.data)
+                                target_user.admin_update_password(update_pass_form.new_password.data,update_pass_form.confirm_new_password.data)
                                 helper_functions.flash_success("Changed Password Successfully")
                             except custom_exceptions.WrongPasswordError:
                                 helper_functions.flash_error("Wrong Password")
@@ -266,7 +289,9 @@ def request_password_reset():
           f"{url}"
           f"</a>")
     msg = Message(subject="Reset Password Request",recipients=[flask_login.current_user.email],sender=("KHWares","khwaresappdev@gmail.com"))
-    msg.body = url
+    msg.body = f"""You have requested a password reset for your KH Wares account
+Click Here: {url} to reset your password
+If you did not request this, Ignore this message. No changes will be made."""
     try:
         mail.mail.send(msg)
     except Exception as e:
@@ -310,13 +335,19 @@ def reset_password(token):
                             form.new_password.errors.append("Passwords do not match")
                             form.confirm_new_password.errors.append("Passwords do not match")
                             helper_functions.flash_error("Passwords do not match")
-                    return redirect(url_for("crud.reset_password",token))
+                    form = forms.UpdateForm.UpdatePasswordForm()
+                    return helper_functions.helper_render("reset_password.html",form=form)
                 else:
                     helper_functions.flash_error("BAD REQUEST")
                     return redirect(url_for("index.index"))
     else:
         helper_functions.flash_error("Invalid Token")
         return redirect(url_for("index.index"))
+
+
+
+
+
 
 @blueprint.route("/signout", methods=["GET", "POST"])
 @flask_login.login_required

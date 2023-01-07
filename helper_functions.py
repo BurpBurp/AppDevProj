@@ -1,6 +1,6 @@
 import os.path
 
-from flask import session, render_template, flash
+from flask import session, render_template, flash, redirect, url_for
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 import secrets
@@ -14,6 +14,14 @@ def helper_render(template, **kwargs):
             return render_template(template, user=user, **kwargs)
     return render_template(template, **kwargs)
 
+def admin_required(function):
+    def wrapper():
+        if flask_login.current_user.role < 1:
+            flash_error("Permission Denied")
+            return redirect(url_for("index.index"))
+        else:
+            return function()
+    return wrapper
 
 def check_logged_in():
     return flask_login.current_user.is_authenticated

@@ -1,6 +1,7 @@
 from sqlalchemy import select, exc, func, and_
 from numbers import Number
 import helper_functions
+from werkzeug.security import check_password_hash, generate_password_hash
 from database import db
 import custom_exceptions
 from flask_login import UserMixin
@@ -34,21 +35,26 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
     def update_email(self, current_password, email):
-        if current_password == self.password:
+        if check_password_hash(self.password,current_password):
             self.email = email
             db.session.commit()
         else:
             raise custom_exceptions.WrongPasswordError("Passwords Dont Match")
 
     def update_password(self,current_password,new_password,confirm_password):
-        if current_password == self.password:
-            self.password = new_password
+        if check_password_hash(self.password,current_password):
+            self.password = generate_password_hash(new_password)
             db.session.commit()
         else:
             raise custom_exceptions.WrongPasswordError("Passwords Dont Match")
+    
+    def admin_update_password(self,new_password,confirm_password):
+        self.password = generate_password_hash(new_password)
+        db.session.commit()
+
 
     def delete_account(self, current_password):
-        if current_password == self.password:
+        if check_password_hash(self.password,current_password):
             db.session.delete(self)
             db.session.commit()
         else:
@@ -56,6 +62,10 @@ class User(db.Model, UserMixin):
 
     def admin_delete_user(self):
         db.session.delete(self)
+        db.session.commit()
+
+    def admin_update_role(self,role):
+        self.role = role
         db.session.commit()
 
 
@@ -183,8 +193,11 @@ def create_user(username, password, f_name, l_name, email, role=0):
 
 
 def try_login_user(username, password):
-    user = User.query.filter_by(username=username, password=password).first()
+    user = User.query.filter_by(username=username).first()
     if user:
-        return user
+        if check_password_hash(user.password,password):
+            return user
+        else:
+            return None
     else:
         return None

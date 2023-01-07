@@ -39,3 +39,7 @@ class UpdateImageForm(FlaskForm):
 
 class ResetPasswordForm(FlaskForm):
     target_user_id = HiddenField()
+
+class UpdateRoleForm(FlaskForm):
+    target_user_id = HiddenField()
+    role = SelectField("Role", choices=[(0, "User"),(1, "Employee"),(2, "Admin")])
