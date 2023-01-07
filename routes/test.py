@@ -1,4 +1,6 @@
 from flask import Blueprint, session, redirect, url_for, render_template, jsonify
+
+import helper_functions
 from database_models.UserDBModel import *
 from database_models.CartDBModel import *
 from database import db
@@ -59,5 +61,11 @@ def test_get_cart(user):
         db.session.commit()
     print(any(item.item.name == "Food" for item in get_user_by_username(user).cart.cart_items))
     return "HI"
+
+@blueprint.route("/admin_required")
+@flask_login.login_required
+@helper_functions.admin_required
+def admin_required():
+    return("Hello")
 
 
