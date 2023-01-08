@@ -62,10 +62,20 @@ def test_get_cart(user):
     print(any(item.item.name == "Food" for item in get_user_by_username(user).cart.cart_items))
     return "HI"
 
+
+
 @blueprint.route("/admin_required")
-@flask_login.login_required
 @helper_functions.admin_required
+@flask_login.login_required
 def admin_required():
+    return("Hello")
+
+
+
+@blueprint.route("/admin_required2")
+@helper_functions.admin_required
+@flask_login.login_required
+def admin_required2():
     return("Hello")
 
 

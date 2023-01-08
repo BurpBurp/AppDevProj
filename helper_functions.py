@@ -15,12 +15,12 @@ def helper_render(template, **kwargs):
     return render_template(template, **kwargs)
 
 def admin_required(function):
-    def wrapper(*args, **kwargs):
+    def wrapper(*args,**kwargs):
         if flask_login.current_user.role < 1:
             flash_error("Permission Denied")
             return redirect(url_for("index.index"))
         else:
-            return function(*args, **kwargs)
+            return function(*args,**kwargs)
     wrapper.__name__ = function.__name__
     return wrapper
 
