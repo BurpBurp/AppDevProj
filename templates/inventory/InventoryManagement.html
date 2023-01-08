@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% set active_page = "DisplayInventory" %}
+
+{% block head %}
+<title>Index</title>
+{% endblock %}
+
+{% block main %}
+<table class="text-center table">
+  <tr>
+    <th>Item Name</th>
+    <th>Quantity</th>
+    <th>Price($SGD)</th>
+    <th>Update</th>
+    <th>Delete</th>
+  </tr>
+    {% for i in itemsList %}
+        <tr>
+            <td>{{ i.name }}</td>
+            <td>{{ i.quantity }}</td>
+            <td>{{ "$%.2f"|format(i.price) }}</td>
+            <td><a class="btn btn-warning" href="{{url_for('InventoryManagement.UpdateInventory', id = i.id)}}/">Update</a></td>
+            <td><a class="btn btn-danger" href="{{url_for('InventoryManagement.DeleteInventory', id = i.id)}}/">Delete</a></td>
+        </tr>
+    {% endfor %}
+</table>
+<a class="btn btn-primary" href="{{url_for('InventoryManagement.AddInventory')}}">Add item</a>
+{% endblock %}

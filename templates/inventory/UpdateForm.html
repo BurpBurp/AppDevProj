@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% set active_page = "AddItem" %}
+
+{% block head %}
+<title>Add Item</title>
+{% endblock %}
+
+{% block main %}
+<div class="container justify-content-center min-vh-100 d-flex align-items-center">
+    <div class="container w-auto">
+        <div class="row justify-content-center">
+            <form action="#" method="post" class="col-md-6 shadow-lg rounded p-5" novalidate>
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group row g-3">
+                    <legend>Update {{ item.name }}</legend>
+                    <div class="form-floating col-md-12">
+                        {% if form.name.errors %}
+                            {{ form.name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.name(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.name.label }}
+                    </div>
+
+                    <div class="form-floating col-md-12">
+                        {% if form.quantity.errors %}
+                            {{ form.quantity(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.quantity.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.quantity(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.quantity.label }}
+                    </div>
+
+                    <div class="form-floating col-md-12">
+                        {% if form.price.errors %}
+                            {{ form.price(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.price.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.price(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.price.label }}
+                    </div>
+                </fieldset>
+
+                <fieldset class="row mt-3 justify-content-end g-3">
+                    <div class="col"> {{ form.submit(class="btn btn-primary float-end") }}</div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
