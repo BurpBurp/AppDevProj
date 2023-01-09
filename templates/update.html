@@ -10,76 +10,59 @@
     <title>Update Page</title>
 
     <link rel="stylesheet" href="{{url_for('static', filename='css/profile-pic-change.css')}}">
-
-    {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
-        <script>
-            $(document).ready(function(){
-              $("#changePassButton").click(function(){
-                $.post({url: "{{ url_for('crud.request_password_reset') }}",
-                    success: function(result){
-                    $("#changePassForm").modal('show')
-                    console.log(result);
-                    },
-                    error: function(result){
-                        $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
-                            An Error Has Occured. Please Try Again
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>`)
-                        console.log("FAIL");
-                    }
-                });
-              });
-            });
-        </script>
-    {% endif %}
-    {% if ((current_user.role >= 2) and (not update_self)) %}
-        <script>
-            $(document).ready(function(){
-                $("#changeRoleSubmitButton").click(function(e){
-                    e.preventDefault()
-                    console.log($("#target_user_id").val())
-                    $.post({url: 
-                        "/update_role"
-                        ,data: {
-                        role: $("#role").val(),
-                        target_user_id: $("#target_user_id").val(),
-                        csrf_token: $("#csrf_token").val(),
-                    },
-                        success: function(result){
-                        $("#changeRoleForm").modal('hide')
-                        $("#flashes").append(`<div class="alert alert-success alert-dismissible" role="alert">
-                            Changed Role Successfully
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>`)
-                        $("#roletext").html(result)
-                        console.log(result);
-                        },
-                        error: function(result){
-                            switch (result.status) {
-                                case 403:
-                                    msg = "Permission Denied"
-                                    break;
-                                case 500:
-                                    msg = "An Error Occurred! Please Try Again"
-                                    break;
-                                case 400:
-                                    msg = "Bad Request! Invalid User ID"
-                                    break;
-                                default:
-                                    msg = "An Error Occurred! Please Try Again"
-                            }
-                            $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
-                                ${msg}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>`)
-                            console.log(result.status);
-                        }
-                    });
-                });
-            });
-        </script>       
-    {% endif %}
 {% endblock %}
+
+<script>
+{% block headscript %}
+{% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+    $(document).ready(function(){
+        $("#changePassButton").click(function(){
+        $.post({url: "{{ url_for('crud.request_password_reset') }}",
+            success: function(result){
+            $("#changePassForm").modal('show')
+            console.log(result);
+            },
+            error: function(result){
+                $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
+                    An Error Has Occured. Please Try Again
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`)
+                console.log("FAIL");
+            }
+        });
+        });
+    });
+{% endif %}
+{% if ((current_user.role >= 2) and (not update_self)) %}
+$(document).ready(function(){
+    $("#changeRoleSubmitButton").click(function(e){
+        e.preventDefault()
+        console.log($("#target_user_id").val())
+        $.post({url:
+            "{{ url_for('crud.update_role') }}"
+            ,data: {
+            role: $("#role").val(),
+            target_user_id: $("#target_user_id").val(),
+            csrf_token: $("#csrf_token").val(),
+        },
+            success: function(result){
+                if (result.success) {
+                    $("#changeRoleForm").modal('hide')
+                    flash(result.msg, "success")
+                    $("#roletext").html(result.role)
+                    console.log(result);
+                } else {
+                    $("#changeRoleForm").modal('hide')
+                    flash(result.msg, "error")
+                    console.log(result);
+                }
+            }
+        });
+    });
+});
+{% endif %}
+{% endblock %}
+</script>
 
 {% block main %}
 

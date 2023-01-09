@@ -35,22 +35,17 @@ blueprint = Blueprint("crud", __name__, template_folder="templates")
 @helper_functions.admin_required
 def update_role():
     if flask_login.current_user.role < 2:
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
 
     form = forms.UpdateForm.UpdateRoleForm()
     if not (target_user := get_user_by_id(form.target_user_id.data)):
-        helper_functions.flash_error("Bad User ID")
-        print(form.target_user_id.data)
-        return abort(http.HTTPStatus.BAD_REQUEST)
-
-    if flask_login.current_user.role < 2:
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return jsonify(success=0, msg=f"Error! No User With ID Ff \'{form.target_user_id.data}\' Found")
 
     try:
         target_user.admin_update_role(form.role.data)
-        return jsonify(target_user.get_role_str())
+        return jsonify(success=1, msg="Successfully Updated User Role!",role=target_user.get_role_str())
     except sqlalchemy.exc.SQLAlchemyError:
-        return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR)
+        return jsonify(success=0, msg=f"Error! An Internal Server Has Occurred. Please Try Again")
 
 @blueprint.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -117,7 +112,7 @@ def update():
 
             if flask_login.current_user.id != target_user.id and flask_login.current_user.role < target_user.role:
                 helper_functions.flash_error("You do not have permission to do that")
-                abort(403)
+                return abort(403)
 
             if target_user.id == flask_login.current_user.id:
                 update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"))

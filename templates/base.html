@@ -6,8 +6,10 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts/flash.js') }}"></script>
     
     {% block head %}{% endblock %}
+
     <script>
       var $loading = $('.loadingDiv').addClass("d-none");
       $(document)
@@ -19,6 +21,8 @@
           console.log("HideDiv")
           $('.loadingDiv').addClass("d-none");
       });
+      {% block headscript %}
+      {% endblock %}
     </script>
 
 
