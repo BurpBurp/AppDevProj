@@ -197,6 +197,10 @@ def update():
                         except custom_exceptions.WrongPasswordError:
                             helper_functions.flash_error("Wrong Password")
                             return redirect(url_for("crud.update", id=target_user.id))
+                        except sqlalchemy.exc.IntegrityError:
+                            db.session.rollback()
+                            helper_functions.flash_error("Email already in use!")
+                            return redirect(url_for("crud.update", id=target_user.id))
                     else:
                         for field in update_email_form.errors:
                             field = getattr(update_email_form,field)
@@ -304,7 +308,6 @@ If you did not request this, Ignore this message. No changes will be made."""
 @flask_login.login_required
 def reset_password(token):
     if flask_login.current_user.reset_token == token:
-
         match request.method:
             case "GET":
                 user = User.query.filter_by(reset_token=token).first()

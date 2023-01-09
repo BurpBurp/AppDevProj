@@ -50,8 +50,15 @@
                         <a class="nav-link" href="#">Contact Us</a>
                     </li>
                     {% if current_user.is_authenticated and current_user.role >=1 %}
-                        <li class="nav-item">
-                            <a class="nav-link {{ 'active' if active_page == 'admin' else '' }}" href="{{ '#' if active_page == 'admin' else url_for('admin.admin') }}">Administration</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ 'active' if active_page == 'admin' else '' }}" href="#" id="AdminNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Administration
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="AdminNavbarDropdownLink">
+                                <li><a class="dropdown-item {{ 'active' if subpage == 'users' else '' }}" href="{{ url_for('admin.admin') }}">User Management</a></li>
+                                <li><a class="dropdown-item {{ 'active' if subpage == 'DisplayInventory' else '' }}" href="{{ url_for('InventoryManagement.ManageInventory') }}">Inventory Management</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
                         </li>
                     {% endif %}
                     </ul>

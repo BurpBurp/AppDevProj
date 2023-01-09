@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
-{% set active_page = "update" %}
+{% if current_user.authenticated and current_user.role > 0 %}
+    {% set active_page = "admin" %}
+    {% set subpage = "update" %}
+{% else %}
+    {% set active_page = "update" %}
+{% endif %}
 
 {% block head %}
     <title>Update Page</title>
