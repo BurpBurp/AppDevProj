@@ -73,5 +73,6 @@ def admin_user_delete():
         return abort(http.HTTPStatus.FORBIDDEN)
 
     target_user.admin_delete_user()
+    helper_functions.flash_success(f"Success! Deleted User {target_user.username}")
 
     return redirect(url_for("admin.admin"))

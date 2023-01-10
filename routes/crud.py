@@ -169,6 +169,7 @@ def update():
 
             if flask_login.current_user.role > target_user.role or (
                     flask_login.current_user.role >= 2 and target_user.id != flask_login.current_user.id):
+                is_admin = True
                 update_pass_form.current_password.data = target_user.password
                 update_email_form.current_password.data = target_user.password
                 update_delete_form.current_password.data = target_user.password
@@ -187,7 +188,7 @@ def update():
                 case "UpdateEmail":
                     if update_email_form.validate_on_submit():
                         try:
-                            target_user.update_email(update_email_form.current_password.data,update_email_form.new_email.data)
+                            target_user.update_email(update_email_form.current_password.data,update_email_form.new_email.data,is_admin)
                             helper_functions.flash_success("Changed Email Successfully")
                         except custom_exceptions.WrongPasswordError:
                             helper_functions.flash_error("Wrong Password")
@@ -258,7 +259,7 @@ def update():
                 case "UpdateDelete":
                     if update_delete_form.validate_on_submit():
                         try:
-                            target_user.delete_account(update_delete_form.current_password.data)
+                            target_user.delete_account(update_delete_form.current_password.data,is_admin)
                         except custom_exceptions.WrongPasswordError:
                             helper_functions.flash_error("Wrong Password")
                             return redirect(url_for("crud.update", id=target_user.id))
