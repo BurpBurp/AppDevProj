@@ -66,11 +66,13 @@ def admin_create_account():
 @flask_login.login_required
 def admin_user_delete():
     if not (target_user := get_user_by_id(request.args.get("id"))):
-        abort(http.HTTPStatus.BAD_REQUEST)
+        helper_functions.flash_error("No user found")
+        return abort(http.HTTPStatus.BAD_REQUEST)
     if flask_login.current_user.role < target_user.role and flask_login.current_user.role < 2:
         helper_functions.flash_error("Permission Denied")
         return abort(http.HTTPStatus.FORBIDDEN)
 
     target_user.admin_delete_user()
+    helper_functions.flash_success(f"Success! Deleted User {target_user.username}")
 
     return redirect(url_for("admin.admin"))

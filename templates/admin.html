@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% set active_page = "admin" %}
+{% set subpage = "users" %}
 
 {% block head %}
 <title>Index</title>
@@ -29,7 +30,7 @@
                 <a class="btn btn-warning" role="button" href="{{url_for('crud.update')}}?id={{target[0].id}}">Update</a>
             </td>
             <td>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#AdminUserDelete_{{ target[0].id }}">
+                <button type="button" class="btn btn-danger {{ 'disabled' if target[0].id == current_user.id else '' }}" data-bs-toggle="modal" data-bs-target="#AdminUserDelete_{{ target[0].id }}">
                     Delete
                 </button>
             </td>

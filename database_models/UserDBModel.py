@@ -34,9 +34,9 @@ class User(db.Model, UserMixin):
         self.l_name = l_name
         db.session.commit()
 
-    def update_email(self, current_password, email):
-        if check_password_hash(self.password,current_password):
-            self.email = email
+    def update_email(self, current_password, email:str, is_admin=False):
+        if check_password_hash(self.password,current_password) or is_admin:
+            self.email = str(email).lower()
             db.session.commit()
         else:
             raise custom_exceptions.WrongPasswordError("Passwords Dont Match")
@@ -53,8 +53,8 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
 
-    def delete_account(self, current_password):
-        if check_password_hash(self.password,current_password):
+    def delete_account(self, current_password,is_admin=False):
+        if check_password_hash(self.password,current_password) or is_admin:
             db.session.delete(self)
             db.session.commit()
         else:
@@ -183,7 +183,7 @@ def get_all_users():
 
 def create_user(username, password, f_name, l_name, email, role=0):
     try:
-        user = User(username=username, password=password, f_name=f_name, l_name=l_name, email=email, role=role)
+        user = User(username=username, password=password, f_name=f_name, l_name=l_name, email=str(email).lower(), role=role)
         db.session.add(user)
         db.session.commit()
         return user

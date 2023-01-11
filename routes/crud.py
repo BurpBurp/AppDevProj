@@ -35,22 +35,17 @@ blueprint = Blueprint("crud", __name__, template_folder="templates")
 @helper_functions.admin_required
 def update_role():
     if flask_login.current_user.role < 2:
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
 
     form = forms.UpdateForm.UpdateRoleForm()
     if not (target_user := get_user_by_id(form.target_user_id.data)):
-        helper_functions.flash_error("Bad User ID")
-        print(form.target_user_id.data)
-        return abort(http.HTTPStatus.BAD_REQUEST)
-
-    if flask_login.current_user.role < 2:
-        return abort(http.HTTPStatus.FORBIDDEN)
+        return jsonify(success=0, msg=f"Error! No User With ID Ff \'{form.target_user_id.data}\' Found")
 
     try:
         target_user.admin_update_role(form.role.data)
-        return jsonify(target_user.get_role_str())
+        return jsonify(success=1, msg="Successfully Updated User Role!",role=target_user.get_role_str())
     except sqlalchemy.exc.SQLAlchemyError:
-        return abort(http.HTTPStatus.INTERNAL_SERVER_ERROR)
+        return jsonify(success=0, msg=f"Error! An Internal Server Has Occurred. Please Try Again")
 
 @blueprint.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -117,7 +112,7 @@ def update():
 
             if flask_login.current_user.id != target_user.id and flask_login.current_user.role < target_user.role:
                 helper_functions.flash_error("You do not have permission to do that")
-                abort(403)
+                return abort(403)
 
             if target_user.id == flask_login.current_user.id:
                 update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"))
@@ -174,6 +169,7 @@ def update():
 
             if flask_login.current_user.role > target_user.role or (
                     flask_login.current_user.role >= 2 and target_user.id != flask_login.current_user.id):
+                is_admin = True
                 update_pass_form.current_password.data = target_user.password
                 update_email_form.current_password.data = target_user.password
                 update_delete_form.current_password.data = target_user.password
@@ -192,10 +188,14 @@ def update():
                 case "UpdateEmail":
                     if update_email_form.validate_on_submit():
                         try:
-                            target_user.update_email(update_email_form.current_password.data,update_email_form.new_email.data)
+                            target_user.update_email(update_email_form.current_password.data,update_email_form.new_email.data,is_admin)
                             helper_functions.flash_success("Changed Email Successfully")
                         except custom_exceptions.WrongPasswordError:
                             helper_functions.flash_error("Wrong Password")
+                            return redirect(url_for("crud.update", id=target_user.id))
+                        except sqlalchemy.exc.IntegrityError:
+                            db.session.rollback()
+                            helper_functions.flash_error("Email already in use!")
                             return redirect(url_for("crud.update", id=target_user.id))
                     else:
                         for field in update_email_form.errors:
@@ -259,7 +259,7 @@ def update():
                 case "UpdateDelete":
                     if update_delete_form.validate_on_submit():
                         try:
-                            target_user.delete_account(update_delete_form.current_password.data)
+                            target_user.delete_account(update_delete_form.current_password.data,is_admin)
                         except custom_exceptions.WrongPasswordError:
                             helper_functions.flash_error("Wrong Password")
                             return redirect(url_for("crud.update", id=target_user.id))
@@ -304,7 +304,6 @@ If you did not request this, Ignore this message. No changes will be made."""
 @flask_login.login_required
 def reset_password(token):
     if flask_login.current_user.reset_token == token:
-
         match request.method:
             case "GET":
                 user = User.query.filter_by(reset_token=token).first()
