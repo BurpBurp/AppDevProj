@@ -30,23 +30,6 @@ from flask_mail import Message
 
 blueprint = Blueprint("crud", __name__, template_folder="templates")
 
-@blueprint.route("/update_role", methods=["POST"])
-@flask_login.login_required
-@helper_functions.admin_required
-def update_role():
-    if flask_login.current_user.role < 2:
-        return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
-
-    form = forms.UpdateForm.UpdateRoleForm()
-    if not (target_user := get_user_by_id(form.target_user_id.data)):
-        return jsonify(success=0, msg=f"Error! No User With ID Ff \'{form.target_user_id.data}\' Found")
-
-    try:
-        target_user.admin_update_role(form.role.data)
-        return jsonify(success=1, msg="Successfully Updated User Role!",role=target_user.get_role_str())
-    except sqlalchemy.exc.SQLAlchemyError:
-        return jsonify(success=0, msg=f"Error! An Internal Server Has Occurred. Please Try Again")
-
 @blueprint.route("/signup", methods=["GET", "POST"])
 def signup():
     form = forms.SignUpForm.SignUpForm()
@@ -167,6 +150,8 @@ def update():
                 helper_functions.flash_error("You do not have permission to do that")
                 return abort(http.HTTPStatus.FORBIDDEN)
 
+            is_admin = False
+
             if flask_login.current_user.role > target_user.role or (
                     flask_login.current_user.role >= 2 and target_user.id != flask_login.current_user.id):
                 is_admin = True
@@ -181,9 +166,11 @@ def update():
                         helper_functions.flash_success("Updated Profile Successfully")
                     else:
                         for field in update_name_form.errors:
-                            field = getattr(update_name_form,field)
-                            for error in field.errors:
-                                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
+                            print(field)
+                            field_obj = getattr(update_name_form,field)
+                            for error in field_obj.errors:
+                                print(error)
+                                helper_functions.flash_error(f"Field: {field_obj.label.text} Error: {error}")
 
                 case "UpdateEmail":
                     if update_email_form.validate_on_submit():
@@ -344,13 +331,66 @@ def reset_password(token):
         return redirect(url_for("index.index"))
 
 
-
-
-
-
 @blueprint.route("/signout", methods=["GET", "POST"])
 @flask_login.login_required
 def signout():
     flask_login.logout_user()
     helper_functions.flash_primary("Signed Out Successfully")
     return redirect(url_for("index.index"))
+
+
+#AJAX Routes
+@blueprint.route("/admin/get_user/<id>/", methods=["POST"])
+@flask_login.login_required
+def ajax_get_user(id):
+    if user := get_user_by_id(id):
+        user_data = {"f_name":user.f_name,"l_name":user.l_name,"username":user.username,"role":user.get_role_str(),"profile_pic":user.profile_pic}
+        return jsonify(success=1,data=user_data)
+    return jsonify(success=0,msg="Error! Internal Server Error (crud.ajax_get_user).")
+
+
+@blueprint.route("/update/update-name", methods=["POST"])
+@flask_login.login_required
+def update_name():
+    update_name_form = forms.UpdateForm.UpdateNameForm()
+    target_user = get_user_by_id(update_name_form.target_user_id.data)
+    if not target_user:
+        return jsonify(success=0, msg=f"Error! User with ID {update_name_form.target_user_id.data} Does Not Exist!")
+
+    if not helper_functions.self_or_admin(target_user):
+        return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
+
+    if update_name_form.validate_on_submit():
+        target_user.update_name(update_name_form.new_f_name.data, update_name_form.new_l_name.data)
+
+    if len(update_name_form.errors) > 0:
+        err_list = {} #key: field_id, value: list of errors
+        for field,v in update_name_form.data.items():
+            error_list = []
+            field_obj = getattr(update_name_form,field)
+            for error in field_obj.errors:
+                error_list.append(error)
+            err_list[field] = error_list
+        return jsonify(success=0, msg="Error!", err_list = err_list)
+    else:
+        fields = list(update_name_form.data.keys())
+        return jsonify(success=1, msg="Success! Updated Profile",fields=fields)
+
+
+@blueprint.route("/update_role", methods=["POST"])
+@flask_login.login_required
+@helper_functions.admin_required
+def update_role():
+    if flask_login.current_user.role < 2:
+        return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
+
+    form = forms.UpdateForm.UpdateRoleForm()
+    if not (target_user := get_user_by_id(form.target_user_id.data)):
+        return jsonify(success=0, msg=f"Error! No User With ID Ff \'{form.target_user_id.data}\' Found")
+
+    try:
+        target_user.admin_update_role(form.role.data)
+        return jsonify(success=1, msg="Successfully Updated User Role!",role=target_user.get_role_str())
+    except sqlalchemy.exc.SQLAlchemyError:
+        return jsonify(success=0, msg=f"Error! An Internal Server Has Occurred. Please Try Again")
+
