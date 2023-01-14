@@ -244,25 +244,26 @@ def update():
                     else:
                         helper_functions.flash_error("Image in JPEG, JPG or PNG format is required.")
 
-                case "UpdateDelete":
-                    if update_delete_form.validate_on_submit():
-                        try:
-                            target_user.delete_account(update_delete_form.current_password.data,is_admin)
-                        except custom_exceptions.WrongPasswordError:
-                            helper_functions.flash_error("Wrong Password")
-                            return redirect(url_for("crud.update", id=target_user.id))
-
-                        if target_user.id == flask_login.current_user.id:
-                            helper_functions.flash_success("Account Deleted Successfully")
-                            return redirect(url_for("index.index"))
-                        else:
-                            helper_functions.flash_success("Account Deleted Successfully")
-                            return redirect(url_for("admin.admin"))
-                    else:
-                        for field in update_delete_form.errors:
-                            field = getattr(update_delete_form,field)
-                            for error in field.errors:
-                                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
+                # Depreciated by AJAX
+                # case "UpdateDelete":
+                #     if update_delete_form.validate_on_submit():
+                #         try:
+                #             target_user.delete_account(update_delete_form.current_password.data,is_admin)
+                #         except custom_exceptions.WrongPasswordError:
+                #             helper_functions.flash_error("Wrong Password")
+                #             return redirect(url_for("crud.update", id=target_user.id))
+                #
+                #         if target_user.id == flask_login.current_user.id:
+                #             helper_functions.flash_success("Account Deleted Successfully")
+                #             return redirect(url_for("index.index"))
+                #         else:
+                #             helper_functions.flash_success("Account Deleted Successfully")
+                #             return redirect(url_for("admin.admin"))
+                #     else:
+                #         for field in update_delete_form.errors:
+                #             field = getattr(update_delete_form,field)
+                #             for error in field.errors:
+                #                 helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
 
             return redirect(url_for("crud.update", id=target_user.id))
 
@@ -345,7 +346,7 @@ def signout():
 @flask_login.login_required
 def ajax_get_user(id):
     if user := get_user_by_id(id):
-        user_data = {"f_name":user.f_name,"l_name":user.l_name,"username":user.username,"role":user.get_role_str(),"profile_pic":user.profile_pic}
+        user_data = {"f_name":user.f_name,"l_name":user.l_name,"username":user.username,"role":user.get_role_str(),"profile_pic":user.profile_pic,"email":user.email}
         return jsonify(success=1,data=user_data)
     return jsonify(success=0,msg="Error! Internal Server Error (crud.ajax_get_user).")
 
@@ -389,24 +390,36 @@ def ajax_delete():
     if not helper_functions.self_or_admin(target_user):
         return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
 
+    destination = "index.index"
+    is_admin = False
+    if helper_functions.is_admin_not_self(target_user):
+        is_admin = True
+
     if update_delete_form.validate_on_submit():
         try:
             target_user.delete_account(update_delete_form.current_password.data,is_admin)
+            if target_user.id == flask_login.current_user.id:
+                helper_functions.flash_success("Account Deleted Successfully")
+                destination = url_for("index.index")
+            else:
+                helper_functions.flash_success("Account Deleted Successfully")
+                destination = url_for("admin.admin")
         except custom_exceptions.WrongPasswordError:
-            helper_functions.flash_error("Wrong Password")
-            return redirect(url_for("crud.update", id=target_user.id))
+            update_delete_form.current_password.errors.append("Incorrect Password. Please Try Again")
 
-        if target_user.id == flask_login.current_user.id:
-            helper_functions.flash_success("Account Deleted Successfully")
-            return redirect(url_for("index.index"))
-        else:
-            helper_functions.flash_success("Account Deleted Successfully")
-            return redirect(url_for("admin.admin"))
+    if len(update_delete_form.errors) > 0:
+        err_list = {} #key: field_id, value: list of errors
+        for field,v in update_delete_form.data.items():
+            error_list = []
+            field_obj = getattr(update_delete_form,field)
+            for error in field_obj.errors:
+                error_list.append(error)
+            err_list[field] = error_list
+        return jsonify(success=0, msg="Error!", err_list = err_list)
+
     else:
-        for field in update_delete_form.errors:
-            field = getattr(update_delete_form,field)
-            for error in field.errors:
-                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
+        fields = list(update_delete_form.data.keys())
+        return jsonify(success=1, msg="Success! Delete Account",fields=fields, destination=destination)
 
 @blueprint.route("/update_role", methods=["POST"])
 @flask_login.login_required

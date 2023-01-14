@@ -38,7 +38,8 @@ def self_or_admin(target: User):
 
 # Darwin's Stuff
 def is_admin_not_self(target: User):
-    if flask_login.current_user.id != target.id and (flask_login.current_user.role > target.role or flask_login.current_user.role == 2):
+    if flask_login.current_user.role > target.role or (
+                    flask_login.current_user.role >= 2 and target.id != flask_login.current_user.id):
         return True
     return False
 
