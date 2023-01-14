@@ -8,6 +8,7 @@ import secrets
 import flask_login
 
 
+# Darwin's Stuff
 def helper_render(template, **kwargs):
     if check_logged_in():
         user = flask_login.current_user
@@ -15,6 +16,8 @@ def helper_render(template, **kwargs):
             return render_template(template, user=user, **kwargs)
     return render_template(template, **kwargs)
 
+
+# Darwin's Stuff
 def admin_required(function):
     def wrapper(*args,**kwargs):
         if flask_login.current_user.role < 1:
@@ -26,28 +29,36 @@ def admin_required(function):
     return wrapper
 
 
+# Darwin's Stuff
 def self_or_admin(target: User):
     if flask_login.current_user.id == target.id or flask_login.current_user.role > target.role or flask_login.current_user.role == 2:
         return True
     return False
 
+
+# Darwin's Stuff
 def is_admin_not_self(target: User):
     if flask_login.current_user.id != target.id and (flask_login.current_user.role > target.role or flask_login.current_user.role == 2):
         return True
     return False
 
+
+# Darwin's Stuff
 def check_logged_in():
     return flask_login.current_user.is_authenticated
 
 
+# Darwin's Stuff
 def flash_error(message):
     flash(message, "error")
 
 
+# Darwin's Stuff
 def flash_success(message):
     flash(message, "success")
 
 
+# Darwin's Stuff
 def flash_primary(message):
     flash(message, "none")
 

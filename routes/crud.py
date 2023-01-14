@@ -160,17 +160,18 @@ def update():
                 update_delete_form.current_password.data = target_user.password
 
             match request.form.get("change_type"):
-                case "UpdateName":
-                    if update_name_form.validate_on_submit():
-                        target_user.update_name(update_name_form.new_f_name.data, update_name_form.new_l_name.data)
-                        helper_functions.flash_success("Updated Profile Successfully")
-                    else:
-                        for field in update_name_form.errors:
-                            print(field)
-                            field_obj = getattr(update_name_form,field)
-                            for error in field_obj.errors:
-                                print(error)
-                                helper_functions.flash_error(f"Field: {field_obj.label.text} Error: {error}")
+                # Migrated UpdateName to AJAX
+                # case "UpdateName":
+                #     if update_name_form.validate_on_submit():
+                #         target_user.update_name(update_name_form.new_f_name.data, update_name_form.new_l_name.data)
+                #         helper_functions.flash_success("Updated Profile Successfully")
+                #     else:
+                #         for field in update_name_form.errors:
+                #             print(field)
+                #             field_obj = getattr(update_name_form,field)
+                #             for error in field_obj.errors:
+                #                 print(error)
+                #                 helper_functions.flash_error(f"Field: {field_obj.label.text} Error: {error}")
 
                 case "UpdateEmail":
                     if update_email_form.validate_on_submit():
@@ -376,6 +377,36 @@ def update_name():
         fields = list(update_name_form.data.keys())
         return jsonify(success=1, msg="Success! Updated Profile",fields=fields)
 
+
+@blueprint.route("/update/delete", methods=["POST"])
+@flask_login.login_required
+def ajax_delete():
+    update_delete_form = forms.UpdateForm.UpdateDeleteForm()
+    target_user = get_user_by_id(update_delete_form.target_user_id.data)
+    if not target_user:
+        return jsonify(success=0, msg=f"Error! User with ID {update_delete_form.target_user_id.data} Does Not Exist!")
+
+    if not helper_functions.self_or_admin(target_user):
+        return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
+
+    if update_delete_form.validate_on_submit():
+        try:
+            target_user.delete_account(update_delete_form.current_password.data,is_admin)
+        except custom_exceptions.WrongPasswordError:
+            helper_functions.flash_error("Wrong Password")
+            return redirect(url_for("crud.update", id=target_user.id))
+
+        if target_user.id == flask_login.current_user.id:
+            helper_functions.flash_success("Account Deleted Successfully")
+            return redirect(url_for("index.index"))
+        else:
+            helper_functions.flash_success("Account Deleted Successfully")
+            return redirect(url_for("admin.admin"))
+    else:
+        for field in update_delete_form.errors:
+            field = getattr(update_delete_form,field)
+            for error in field.errors:
+                helper_functions.flash_error(f"Field: {field.label.text} Error: {error}")
 
 @blueprint.route("/update_role", methods=["POST"])
 @flask_login.login_required

@@ -1,3 +1,4 @@
+<!-- Darwin's Stuff -->
 {% extends 'base.html' %}
 {% if current_user.authenticated and current_user.role > 0 %}
     {% set active_page = "admin" %}
@@ -124,12 +125,12 @@ function update_user_data(id) {
         });
     });
 
-// Change Email AJAX
-$("#changeNameFormSubmitButton").click(function(e){
+// Delete Account AJAX
+$("#changeDeleteFormSubmitButton").click(function(e){
         e.preventDefault()
         console.log($("#target_user_id").val())
         $.post({url:"{{ url_for('crud.update_name') }}"
-            ,data: $('#changeNameFormInner').serialize(),
+            ,data: $('#changeDeleteForm').serialize(),
             success: function(result){
                 if (result.success) {
                     for (i=0; i < result.fields.length; i++) {
@@ -398,7 +399,7 @@ $("#changeNameFormSubmitButton").click(function(e){
 
     <div class="modal fade" id="changeDeleteForm" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <form action="#" method="post" class="modal-content" novalidate>
+            <form action="#" method="post" class="modal-content" id="changeDeleteFormInner" novalidate>
                 <div class="modal-header">
                     <h5 class="modal-title" id="changeDeleteFormLabel">Delete Account</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -407,6 +408,8 @@ $("#changeNameFormSubmitButton").click(function(e){
                     {{ update_delete_form.hidden_tag()}}
                     <div class="row g-3">
                         {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                            <span>Are you sure you want to delete your account?</span>
+                            <span>Enter Your Password to Delete</span>
                             <div class="form-floating col-md-12">
                                 {% if update_delete_form.current_password.errors %}
                                     {{ update_delete_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
@@ -427,7 +430,7 @@ $("#changeNameFormSubmitButton").click(function(e){
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    {{ update_delete_form.submit(class="btn btn-danger float-end") }}
+                    {{ update_delete_form.submit(class="btn btn-danger float-end",id="changeDeleteFormSubmitButton") }}
                 </div>
             </form>
         </div>
