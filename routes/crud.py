@@ -312,10 +312,10 @@ def reset_password(token):
                             try:
                                 user.reset_token = ""
                                 db.session.commit()
+                                helper_functions.flash_success("Changed Password Successfully")
+                                return redirect(url_for("index.index"))
                             except sqlalchemy.exc.SQLAlchemyError:
                                 pass
-                            helper_functions.flash_success("Changed Password Successfully")
-                            return redirect(url_for("index.index"))
                         except custom_exceptions.WrongPasswordError:
                             form.current_password.errors.append("Incorrect Password")
                             helper_functions.flash_error("Wrong Password")
@@ -323,7 +323,6 @@ def reset_password(token):
                             form.new_password.errors.append("Passwords do not match")
                             form.confirm_new_password.errors.append("Passwords do not match")
                             helper_functions.flash_error("Passwords do not match")
-                    form = forms.UpdateForm.UpdatePasswordForm()
                     return helper_functions.helper_render("reset_password.html",form=form)
                 else:
                     helper_functions.flash_error("BAD REQUEST")

@@ -9,7 +9,7 @@ class UpdatePasswordForm(FlaskForm):
     change_type = HiddenField(default="UpdatePassword")
     current_password = PasswordField("Current Password",validators=[DataRequired()])
     new_password = PasswordField("New Password",validators=[DataRequired()])
-    confirm_new_password = PasswordField("Re-Enter New Password",validators=[DataRequired(),EqualTo("new_password")])
+    confirm_new_password = PasswordField("Re-Enter New Password",validators=[DataRequired(),EqualTo("new_password",message="Passwords Do Not Match")])
     submit = SubmitField("Change Password")
 
 class UpdateEmailForm(FlaskForm):
