@@ -1,3 +1,4 @@
+// Darwin's Stuff
 function flash(message, category) {
     switch (category) {
         case "error":

@@ -1,3 +1,4 @@
+<!-- Darwin's Stuff -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,15 +13,6 @@
 
     <script>
       var $loading = $('.loadingDiv').addClass("d-none");
-      $(document)
-      .ajaxStart(function () {
-          console.log("ShowDiv")
-          $('.loadingDiv').removeClass("d-none");
-      })
-      .ajaxStop(function () {
-          console.log("HideDiv")
-          $('.loadingDiv').addClass("d-none");
-      });
       {% block headscript %}
       {% endblock %}
     </script>

@@ -1,11 +1,14 @@
+# Darwin's Stuff
 from flask import Blueprint, request, redirect, url_for, session, abort
 from sqlalchemy import exc, select, or_, and_
 import http
 import forms.SignUpForm
 from database import db
 from werkzeug.security import generate_password_hash
+
 from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id, get_all_users, create_user, get_user_by_email,UserStats
 from database_models.CartDBModel import create_cart
+
 import custom_exceptions
 import helper_functions
 import flask_login
