@@ -14,6 +14,7 @@ from database_models.CartDBModel import Cart
 import flask_login
 import errors.page_not_found, errors.permission_denied
 from flask_wtf import CSRFProtect
+import stripe
 
 login_manager = flask_login.LoginManager()
 
@@ -29,6 +30,7 @@ def create_app():
     init_flask_login_service(app)
     register_errors(app)
     register_blueprints(app)
+    stripe.api_key = "sk_test_51MDlHYDQzRgNH5IUgsbdpkS3Vg5w2Xk0tAedq4Rn4cqKXGkFHFqTc2JoYqfpVCExKl41A8Z5lyieh3IJDTiyllX700gzt5Jila"
     Session(app)  # Start Sever Side Session
     return app
 
