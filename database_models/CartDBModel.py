@@ -27,3 +27,8 @@ class Cart_Item(db.Model):
     Item_id = db.Column(db.Integer,ForeignKey(Item.id))
     quantity = db.Column(db.Integer,default=1)
 
+def create_cart(user: User):
+    cart = Cart(user=user)
+    db.session.add(cart)
+    db.session.commit()
+    return True
