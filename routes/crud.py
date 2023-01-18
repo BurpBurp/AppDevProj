@@ -392,6 +392,7 @@ def ajax_delete():
     destination = "index.index"
     is_admin = False
     if helper_functions.is_admin_not_self(target_user):
+        update_delete_form.current_password.data = "PLACEHOLDER"
         is_admin = True
 
     if update_delete_form.validate_on_submit():
@@ -419,6 +420,45 @@ def ajax_delete():
     else:
         fields = list(update_delete_form.data.keys())
         return jsonify(success=1, msg="Success! Delete Account",fields=fields, destination=destination)
+
+@blueprint.route("/update/change_email", methods=["POST"])
+@flask_login.login_required
+def ajax_change_email():
+    update_email_form = forms.UpdateForm.UpdateEmailForm()
+    target_user = get_user_by_id(update_email_form.target_user_id.data)
+    if not target_user:
+        return jsonify(success=0, msg=f"Error! User with ID {update_email_form.target_user_id.data} Does Not Exist!")
+
+    if not helper_functions.self_or_admin(target_user):
+        return jsonify(success=0, msg="Error! You Do Not Have Permission To Do This")
+
+    is_admin = False
+    if helper_functions.is_admin_not_self(target_user):
+        update_email_form.current_password.data = "PLACEHOLDER"
+        is_admin = True
+
+    if update_email_form.validate_on_submit():
+        try:
+            target_user.update_email(update_email_form.current_password.data,update_email_form.new_email.data,is_admin)
+        except custom_exceptions.WrongPasswordError:
+            update_email_form.current_password.errors.append("Incorrect Password")
+            update_email_form.current_password.errors.append("Incorrect Password2")
+        except sqlalchemy.exc.IntegrityError:
+            db.session.rollback()
+            update_email_form.new_email.errors.append("Email already in use!")
+
+    if len(update_email_form.errors) > 0:
+        err_list = {} #key: field_id, value: list of errors
+        for field,v in update_email_form.data.items():
+            error_list = []
+            field_obj = getattr(update_email_form,field)
+            for error in field_obj.errors:
+                error_list.append(error)
+            err_list[field] = error_list
+        return jsonify(success=0, msg="Error!", err_list = err_list)
+    else:
+        fields = list(update_email_form.data.keys())
+        return jsonify(success=1, msg="Success! Updated Email",fields=fields)
 
 @blueprint.route("/update_role", methods=["POST"])
 @flask_login.login_required
