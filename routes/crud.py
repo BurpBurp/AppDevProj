@@ -8,6 +8,8 @@ import time
 import secrets
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from serializer import serializer
+from itsdangerous import SignatureExpired, BadSignature
 
 import forms.LoginForm
 import forms.SignUpForm
@@ -275,13 +277,14 @@ def update():
 def request_password_reset():
     token = secrets.token_urlsafe(16)
     flask_login.current_user.reset_token = token
-    url = "http://localhost:5000" + url_for("crud.reset_password",token=token)
+    serialized = serializer.dumps(token,salt="PasswordReset")
+    url = "http://localhost:5000" + url_for("crud.reset_password",token=serialized)
     print(f"<a href='{url}'>"
           f"{url}"
           f"</a>")
     msg = Message(subject="Reset Password Request",recipients=[flask_login.current_user.email],sender=("KHWares","khwaresappdev@gmail.com"))
     msg.body = f"""You have requested a password reset for your KH Wares account
-Click Here: {url} to reset your password
+Click Here: {url} to reset your password. This link will expire in 10 minutes.
 If you did not request this, Ignore this message. No changes will be made."""
     try:
         mail.mail.send(msg)
@@ -294,6 +297,18 @@ If you did not request this, Ignore this message. No changes will be made."""
 @blueprint.route("/reset_password/<token>",methods=["GET","POST"])
 @flask_login.login_required
 def reset_password(token):
+    try:
+        token = serializer.loads(token,salt="PasswordReset",max_age=600)
+    except SignatureExpired:
+        helper_functions.flash_error("Token Has Expired")
+        flask_login.current_user.reset_token = ""
+        db.session.commit()
+        return redirect(url_for("index.index"))
+    except BadSignature:
+        helper_functions.flash_error("Token Is Invalid")
+        return redirect(url_for("index.index"))
+
+
     if flask_login.current_user.reset_token == token:
         match request.method:
             case "GET":
