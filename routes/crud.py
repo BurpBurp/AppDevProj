@@ -18,6 +18,7 @@ import helper_functions
 
 from database_models.UserDBModel import get_user_by_username, get_user_by_id, create_user, \
     get_user_by_email, try_login_user, User
+from database_models.CartDBModel import create_cart
 
 import os
 
@@ -56,6 +57,7 @@ def signup():
                 user = create_user(form.username.data, generate_password_hash(form.password.data), form.f_name.data, form.l_name.data,
                                    form.email.data)
                 helper_functions.flash_success("Account Created Successfully")
+                create_cart(user)
                 flask_login.login_user(user)
                 return redirect(url_for("index.index"))
             except custom_exceptions.UserAlreadyExistsError:
