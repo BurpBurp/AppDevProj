@@ -6,7 +6,7 @@ import forms.SignUpForm
 from database import db
 from werkzeug.security import generate_password_hash
 
-from database_models.UserDBModel import User, HelperUser, get_user_by_username, get_user_by_id, get_all_users, create_user, get_user_by_email,UserStats
+from database_models.UserDBModel import User, get_user_by_username, get_user_by_id, get_all_users, create_user, get_user_by_email,UserStats
 from database_models.CartDBModel import create_cart
 
 import custom_exceptions
