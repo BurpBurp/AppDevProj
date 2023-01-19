@@ -8,6 +8,7 @@ import flask_login
 from sqlalchemy import text
 from flask_mail import Message
 import mail
+import stripe
 
 blueprint = Blueprint("test", __name__, template_folder="templates")
 
@@ -79,3 +80,47 @@ def admin_required2():
     return("Hello")
 
 
+
+
+
+
+
+@blueprint.route("/cart/checkout")
+@flask_login.login_required
+def checkout():
+    cart = flask_login.current_user.cart.cart_items
+    if len(cart) <= 0:
+        return "Cart Empty"
+
+    items = []
+    for item in cart:
+        line_item = {'price_data': {
+                    'currency':'SGD',
+                    'product_data':{
+                        'name': item.item.name,
+                        'description':'Desc'},
+                    'unit_amount': int(item.item.price*100),
+                    },
+                    'quantity':item.quantity
+                }
+        items.append(line_item)
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items = items,
+            success_url = url_for('test.checkout_success',_external=True, id=flask_login.current_user.cart.id),
+            cancel_url = url_for('cart.read_cart',_external=True),
+            mode = 'payment',
+            payment_method_types = ['card', 'paynow', 'grabpay'],
+            customer_email=flask_login.current_user.email
+        )
+
+    except Exception as e:
+        return str(e)
+
+    return redirect(checkout_session.url)
+
+
+@blueprint.route("/cart/checkout/success/<id>/")
+def checkout_success(id):
+    return "checkout success " + id
