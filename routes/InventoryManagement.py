@@ -1,5 +1,4 @@
 from flask import Blueprint, session, render_template, request, redirect, url_for
-from database_models.UserDBModel import *
 from database_models.CartDBModel import *
 from forms.AddItemForm import *
 import flask_login
@@ -11,8 +10,6 @@ blueprint = Blueprint("InventoryManagement", __name__, template_folder="template
 @helper_functions.admin_required
 def ManageInventory():
     item = Item.query.all()
-    for i in item:
-        print(i.name)
     return render_template("inventory/InventoryManagement.html", itemsList= item)
 
 @blueprint.route("/ManageInventory/AddItem", methods = ["GET", "POST"])

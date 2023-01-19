@@ -8,6 +8,7 @@ import routes.crud as crud
 import routes.index as index
 import routes.admin as admin
 import routes.InventoryManagement as inventory
+import routes.store as store
 import routes.cart as cart
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
@@ -65,6 +66,7 @@ def register_blueprints(app: Flask):
     app.register_blueprint(admin.blueprint)  # Register Admin Routes
     app.register_blueprint(inventory.blueprint)  # Register Inventory Route
     app.register_blueprint(cart.blueprint)
+    app.register_blueprint(store.blueprint)
 
 def setup_database(app: Flask):
     with app.app_context():
