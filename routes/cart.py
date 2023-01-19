@@ -45,6 +45,9 @@ def delete_item(id):
 @flask_login.login_required
 def deletecart():
     cart = flask_login.current_user.cart
+    for item in cart.cart_items:
+        db.session.delete(item)
+        db.session.commit()
     db.session.delete(cart)
     db.session.commit()
     create_cart(flask_login.current_user)
