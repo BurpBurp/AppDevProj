@@ -9,7 +9,7 @@
 <div class="container justify-content-center min-vh-100 d-flex align-items-center">
     <div class="container w-auto">
         <div class="row justify-content-center">
-            <form action="#" method="post" class="col-md-6 shadow-lg rounded p-5" novalidate>
+            <form action="#" method="post" class="col-md-6 shadow-lg rounded p-5" enctype="multipart/form-data" novalidate>
                 {{ form.hidden_tag() }}
                 <fieldset class="form-group row g-3">
                     <legend>New Item</legend>
@@ -53,6 +53,19 @@
                             {{ form.price(class="form-control form-control-lg",placeholder="a") }}
                         {% endif %}
                         {{ form.price.label }}
+                    </div>
+                    <div class="col-md-12">
+                        {% if form.image.errors %}
+                            {{ form.image(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.image.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.image(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.image.label }}
                     </div>
                 </fieldset>
 
