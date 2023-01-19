@@ -34,7 +34,7 @@ def AddInventory():
             for file in form.image.data:
                 file_name = f"{secrets.token_urlsafe(8)}{os.path.splitext(secure_filename(file.filename))[1]}"
                 files_filenames.append(file_name)
-                path = os.path.join("items", "profiles", file_name)
+                path = os.path.join("static", "items", file_name)
                 file.save(path)
 
 
