@@ -36,6 +36,7 @@ def AddInventory():
                 files_filenames.append(file_name)
                 path = os.path.join("static", "items", file_name)
                 file.save(path)
+                print(path)
 
 
             item = Item(name=form.name.data,price=form.price.data,quantity=form.quantity.data,images=files_filenames)
