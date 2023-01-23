@@ -8,12 +8,13 @@ import time
 import secrets
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from serializer import serializer
+from serializer import serializer, non_timed_serializer
 from itsdangerous import SignatureExpired, BadSignature
 
 import forms.LoginForm
 import forms.SignUpForm
 import forms.UpdateForm
+import forms.TOTPForms
 
 import custom_exceptions
 import helper_functions
@@ -67,9 +68,13 @@ def login():
     if request.method == "POST":
         if form.validate_on_submit():
             if user := try_login_user(form.username.data, form.password.data):
+                next_url = request.args.get("next")
+                print(next_url)
+                if user.totp_secret:
+                    token = non_timed_serializer.dumps([user.id,secrets.token_urlsafe()],salt="TOTPLogin")
+                    return redirect(url_for("totp.totp_login",next=[next_url], token=token, remember=form.remember.data))
                 flask_login.login_user(user, remember=form.remember.data)
                 helper_functions.flash_success("Logged in Successfully")
-                next_url = request.args.get("next")
                 return redirect(next_url or url_for("index.index"))
             else:
                 helper_functions.flash_error("Username or Password Incorrect")
@@ -88,7 +93,12 @@ def login():
 def update():
     match request.method:
         case "GET":
-            if not (target_user := get_user_by_id(request.args.get("id"))):
+            if request.args.get("id"):
+                target_id = request.args.get("id")
+            else:
+                target_id = flask_login.current_user.id
+
+            if not (target_user := get_user_by_id(target_id)):
                 helper_functions.flash_error("Invalid user ID")
                 return abort(http.HTTPStatus.BAD_REQUEST)
 
@@ -107,6 +117,7 @@ def update():
                 update_email_form = forms.UpdateForm.UpdateEmailForm(target_user_id=request.args.get("id"))
                 update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"))
                 update_image_form = forms.UpdateForm.UpdateImageForm(target_user_id=request.args.get("id"))
+                remove_totp_form = forms.TOTPForms.RemoveTOTP()
                 update_name_form.new_f_name.data = target_user.f_name
                 update_name_form.new_l_name.data = target_user.l_name
                 return helper_functions.render_template("update.html", target_user=target_user,
@@ -115,6 +126,7 @@ def update():
                                                         update_name_form=update_name_form,
                                                         update_delete_form=update_delete_form,
                                                         update_image_form=update_image_form,
+                                                        remove_totp_form=remove_totp_form,
                                                         update_self=True)
 
             elif flask_login.current_user.role > target_user.role or flask_login.current_user.role >= 2:
@@ -126,7 +138,7 @@ def update():
                                                                      current_password="PlaceHolder")
                 update_delete_form = forms.UpdateForm.UpdateDeleteForm(target_user_id=request.args.get("id"),
                                                                        current_password="PlaceHolder")
-
+                remove_totp_form = forms.TOTPForms.RemoveTOTP()
                 update_name_form.new_f_name.data = target_user.f_name
                 update_name_form.new_l_name.data = target_user.l_name
                 update_role_form = forms.UpdateForm.UpdateRoleForm(target_user_id=request.args.get("id"),role=target_user.role)
@@ -137,6 +149,7 @@ def update():
                                                         update_delete_form=update_delete_form,
                                                         update_image_form=update_image_form,
                                                         update_role_form=update_role_form,
+                                                        remove_totp_form=remove_totp_form,
                                                         update_self=False)
 
         case "POST":

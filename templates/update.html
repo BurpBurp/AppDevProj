@@ -211,6 +211,37 @@ $("#changeEmailFormSubmitButton").click(function(e){
     })
 
 
+// Remove TOTP Ajax
+$("#removeTOTPFormSubmitButton").click(function(e){
+
+        e.preventDefault()
+        console.log("AJAX Remove TOTP")
+        console.log($("#target_user_id").val())
+        console.log($('#removeTOTPFormInner').serialize())
+        $.post({url:"{{ url_for('totp.ajax_remove_totp',id=target_user.id) }}"
+            ,data: $('#removeTOTPFormInner').serialize(),
+            success: function(result){
+                console.log(result)
+                if (result.success) {
+                    
+                    location.reload(true)
+                    flash(result.msg,"success")
+                } else {
+                    if (result.err_list) {
+                        for (field in result.err_list) {
+                            add_error("removeTOTPForm",field,result.err_list[field])
+                        }
+                        $(`#removeTOTPForm #current_password`).val("")
+                    } else {
+                        $("#RemoveTOTPForm").modal('hide')
+                        flash(result.msg, "error")
+                    }
+                }
+            }
+        });
+    })
+
+
 });
 {% endblock %}
 </script>
@@ -258,6 +289,16 @@ $("#changeEmailFormSubmitButton").click(function(e){
                     <button type="button" id="changeRoleButton" class="btn btn-warning col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeRoleForm">
                         Change Role
                     </button>
+                {% endif %}
+
+                {% if target_user.totp_secret %}
+                    <button type="button" id="changeRoleButton" class="btn btn-warning col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#removeTOTPForm">
+                        Remove OTP
+                    </button>
+                {% elif update_self %}
+                    <a id="addTOTPButton" class="btn btn-success col-xl-2 col-md-12 m-2" href="{{ url_for('totp.register_totp') }}">
+                        Register OTP
+                    </a>
                 {% endif %}
 
                 <button type="button" class="btn btn-danger col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeDeleteForm">
@@ -517,6 +558,46 @@ $("#changeEmailFormSubmitButton").click(function(e){
             </form>
         </div>
     </div>
+
+    {% if target_user.totp_secret %}
+        <div class="modal fade" id="removeTOTPForm" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <form action="{{ url_for('totp.ajax_remove_totp', id=target_user.id ) }}" method="post" class="modal-content" id="removeTOTPFormInner" novalidate>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="removeTOTPFormLabel">Remove One Time Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body container-fluid">
+                        {{ remove_totp_form.hidden_tag() }}
+                        {% if not ((current_user.role > target_user.role or current_user.role == 2) and (not update_self)) %}
+                            <div class="row g-3">
+                                <span>Enter Password to Remove OTP</span>
+                                <div class="form-floating col-md-12">
+                                    {% if remove_totp_form.current_password.errors %}
+                                        {{ remove_totp_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in remove_totp_form.current_password.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ remove_totp_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                                    {% endif %}
+                                    {{ remove_totp_form.current_password.label }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <span>Are you sure you want to remove OTP for user {{target_user.username}}?</span>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary modal-close" data-bs-dismiss="modal">Close</button>
+                        {{ remove_totp_form.submit(class="btn btn-danger float-end", id="removeTOTPFormSubmitButton") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
 
     {% if ((current_user.role >= 2) and (not update_self)) %}
         <div class="modal fade" id="changeRoleForm" tabindex="-1">

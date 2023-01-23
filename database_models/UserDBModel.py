@@ -54,6 +54,12 @@ class User(db.Model, UserMixin):
         self.password = generate_password_hash(new_password)
         db.session.commit()
 
+    def remove_totp(self,current_password,is_admin=False):
+        if check_password_hash(self.password,current_password) or is_admin:
+            self.totp_secret = None
+            db.session.commit()
+        else:
+            raise custom_exceptions.WrongPasswordError()
 
     def delete_account(self, current_password,is_admin=False):
         if check_password_hash(self.password,current_password) or is_admin:
