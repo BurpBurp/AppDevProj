@@ -459,7 +459,6 @@ def ajax_change_email():
             target_user.update_email(update_email_form.current_password.data,update_email_form.new_email.data,is_admin)
         except custom_exceptions.WrongPasswordError:
             update_email_form.current_password.errors.append("Incorrect Password")
-            update_email_form.current_password.errors.append("Incorrect Password2")
         except sqlalchemy.exc.IntegrityError:
             db.session.rollback()
             update_email_form.new_email.errors.append("Email already in use!")
