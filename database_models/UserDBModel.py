@@ -20,6 +20,7 @@ class User(db.Model, UserMixin):
     reset_token = db.Column(db.String)
     profile_pic = db.Column(db.String, default="default.png")
     date_created = db.Column(db.DateTime(), default=func.now())
+    totp_secret = db.Column(db.String)
 
     def get_role_str(self):
         match self.role:
