@@ -105,6 +105,7 @@ def forgot_password_reset(token):
                                 helper_functions.flash_success("Changed Password Successfully")
                                 return redirect(url_for("index.index"))
                             except sqlalchemy.exc.SQLAlchemyError:
+                                helper_functions.flash_error("Error! Internal Server Error (SQLAlchemyError)")
                                 pass
                         except custom_exceptions.PasswordNotMatchError:
                             form.new_password.errors.append("Passwords do not match")
