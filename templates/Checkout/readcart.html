@@ -1,27 +1,49 @@
 {% extends 'base.html' %}
-{% set active_page = "admin" %}
-{% set subpage = "DisplayInventory" %}
+{% set active_page = "cart" %}
 
 {% block head %}
-<title>Index</title>
+<title>Cart</title>
 {% endblock %}
 
 {% block main %}
 <table class="text-center table">
-  <tr>
-    <th>Item Name</th>
-    <th>Quantity</th>
-    <th>Price($SGD)</th>
-    <th>Update</th>
-    <th>Delete</th>
-  </tr>
+    <tr>
+        <th>Item Name</th>
+        <th>Quantity</th>
+        <th>Price($SGD)</th>
+        <th>Update</th>
+        <th>Delete</th>
+    </tr>
     {% for i in cart %}
         <tr>
             <td>{{ i.item.name }}</td>
             <td>{{ i.quantity }}</td>
             <td>{{ "$%.2f"|format(i.item.price) }}</td>
-<!--            <td><a class="btn btn-warning" href="{{url_for('InventoryManagement.UpdateInventory', id = i.id)}}/">Update</a></td>-->
-            <td><a class="btn btn-danger" href="{{url_for('cart.delete_item', id = i.id)}}/">Delete</a></td>
+            <td>
+                <a class="btn btn-warning" href="{{url_for('', id = i.id)}}/">Update</a>
+            </td>
+            <td>
+                <div class="container">
+                    <a class="btn btn-danger" href="#delete_confirmation">Delete</a>
+
+                    <!-- using bootstrap modal for the confirmation after clicking the delete button -->
+                    <div class="modal fade" id="delete_confirmation" role="dialog">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Remove Item</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Remove {{ i.item.name }} from cart?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary">
+                                <a class="btn btn-danger" href="{{url_for('cart.delete_item', id = i.id)}}/">Delete</a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </td>
         </tr>
     {% endfor %}
 </table>

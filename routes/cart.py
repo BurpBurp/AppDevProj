@@ -13,7 +13,7 @@ def read_cart():
     cart = flask_login.current_user.cart.cart_items
     return render_template("Checkout/readcart.html",cart=cart)
 
-@blueprint.route("/cart/add_to_cart/<id>/", methods=["GET","POST"])
+@blueprint.route("/cart/add_to_cart/<id>", methods=["GET","POST"])
 @flask_login.login_required
 def add_to_cart(id):
     form = AddToCartForm()
@@ -22,15 +22,20 @@ def add_to_cart(id):
         helper_functions.flash_error("Item Does Not Exist")
         return redirect(url_for("index.index"))
     if request.method == "POST":
-        cart_item = Cart_Item(cart=flask_login.current_user.cart,item=item,quantity=form.quantity.data)
-        db.session.add(cart_item)
-        db.session.commit()
+        if cart_item := Cart_Item.query.filter_by(Item_id=item.id).first():
+            cart_item.quantity += form.quantity.data
+            db.session.commit()
+        else:
+            cart_item = Cart_Item(cart=flask_login.current_user.cart,item=item,quantity=form.quantity.data)
+            db.session.add(cart_item)
+            db.session.commit()
+
         helper_functions.flash_success(f"Added {item.name} to cart")
         return redirect(url_for("cart.read_cart"))
     return render_template("Checkout/addtocart.html",item=item,form=form)
     pass
 
-@blueprint.route("/cart/delete_item/<id>/")
+@blueprint.route("/cart/delete_item/<id>")
 @flask_login.login_required
 def delete_item(id):
     item = Cart_Item.query.filter_by(id=id).first()

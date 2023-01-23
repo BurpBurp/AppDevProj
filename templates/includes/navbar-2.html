@@ -49,6 +49,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Contact Us</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('cart.read_cart') }}">Cart</a>
+                    </li>
                     {% if current_user.is_authenticated and current_user.role >=1 %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ 'active' if active_page == 'admin' else '' }}" href="#" id="AdminNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

@@ -79,6 +79,8 @@ def user_loader(id):
     return user
 
 
+
+
 if __name__ == "__main__":
     app: Flask = create_app()
     if not os.path.isfile('instance/master.db'):
