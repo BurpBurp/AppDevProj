@@ -50,7 +50,7 @@
                         <a class="nav-link" href="#">Contact Us</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('cart.read_cart') }}">Cart</a>
+                        <a class="nav-link {{ 'active' if active_page == 'cart' else '' }}"  href="{{ url_for('cart.read_cart') }}">Cart</a>
                     </li>
                     {% if current_user.is_authenticated and current_user.role >=1 %}
                         <li class="nav-item dropdown">

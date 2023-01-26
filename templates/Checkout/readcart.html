@@ -6,6 +6,9 @@
 {% endblock %}
 
 {% block main %}
+
+<a type="button" class="btn btn-primary" href="{{ url_for('index.index') }}">Continue Shopping</a>
+
 <table class="text-center table">
     <tr>
         <th>Item Name</th>
@@ -20,38 +23,86 @@
             <td>{{ i.quantity }}</td>
             <td>{{ "$%.2f"|format(i.item.price) }}</td>
             <td>
-                <a class="btn btn-warning" href="{#url_for('', id = i.id)#}/">Update</a>
+                <div class="container">
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#update_confirmation_{{ i.id }}">
+                      Update
+                    </button>
+                </div>
             </td>
             <td>
                 <div class="container">
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_confirmation_{{ i.id }}">
                       Delete
                     </button>
-
-
                 </div>
             </td>
         </tr>
-<!-- using bootstrap modal for the confirmation after clicking the delete button -->
-<div class="modal fade" id="delete_confirmation_{{ i.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        Are You Sure You Want To Delete {{ i.item.name }}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <a type="button" class="btn btn-danger" href="{{ url_for('cart.delete_item',id=i.id) }}">Delete</a>
-      </div>
-    </div>
-  </div>
-</div>
-    {% endfor %}
-</table>
-<a class="btn btn-primary" href="{{url_for('cart.deletecart')}}">Clear Cart</a>
 
+        <!-- using bootstrap modal to update quantity after clicking the update button -->
+
+        <div class="modal fade" id="update_confirmation_{{ i.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="update_quantity_label_{{ i.id }}">Update Quantity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Change quantity of {{ i.item.name }}
+              </div>
+                <form action="{{ url_for('cart.update_qty',id=i.id) }}" method="POST">
+                    <input type="number" name="quantity" id="">
+                </form>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a type="button" class="btn btn-warning" href="{{ url_for('cart.update_qty',id=i.id) }}">Update</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- using bootstrap modal for the confirmation after clicking the delete button -->
+
+        <div class="modal fade" id="delete_confirmation_{{ i.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="delete_confirmation_label_{{ i.id }}">Deleting Item from Cart.</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Are you sure you want to delete {{ i.item.name }}?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a type="button" class="btn btn-danger" href="{{ url_for('cart.delete_item',id=i.id) }}">Delete</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
+</table>
+
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#delete_cart">
+            Clear Cart
+        </button>
+
+        <div class="modal fade" id="delete_cart" tabindex="-1" aria-labelledby="modal" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modal">Deleting Cart.</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Are you sure you want to delete all items in cart?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a type="button" class="btn btn-danger" href="{{ url_for('cart.deletecart') }}">Delete</a>
+              </div>
+            </div>
+          </div>
+        </div>
 {% endblock %}
