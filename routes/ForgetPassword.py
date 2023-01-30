@@ -31,7 +31,7 @@ def forgot_password():
         return render_template("forgot_password/forgot_password.html", form=form, title="Forgot Password")
     elif request.method == "POST":
         if form.validate_on_submit():
-            user = get_user_by_email(form.email.data)
+            user = get_user_by_email(form.email.data.lower())
             if not user:
                 form.email.errors.append("User with this email does not exist")
                 helper_functions.flash_error("Invalid Email")
