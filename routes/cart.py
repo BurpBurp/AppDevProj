@@ -128,34 +128,35 @@ def checkout_success(token):
     except BadSignature:
         return "Invalid Token"
 
-    if Order.query.filter_by(token=payload.get("token")).first():
-        return "BAD REQUEST! order already processed"
+    if not (order := Order.query.filter_by(token=payload.get("token")).first()):
 
 
-    user = get_user_by_id(payload.get("id"))
-    if not user:
-        return "BAD USER"
+        user = get_user_by_id(payload.get("id"))
+        if not user:
+            return "BAD USER"
 
-    cart = user.cart
-    if len(cart.cart_items) <= 0:
-        return "Empty Cart"
+        cart = user.cart
+        if len(cart.cart_items) <= 0:
+            return "Empty Cart"
 
-    order = Order(user=user,token=payload.get("token"))
-    db.session.add(order)
-    db.session.commit()
-    total = 0
-    for item in cart.cart_items:
-        total += item.item.price * item.quantity
-        order_item = Order_Item(orders=order,item=item.item,name=item.item.name,price=item.item.price,description=item.item.description,quantity=item.quantity,
-                                images=item.item.images,category=item.item.category)
-        db.session.add(order_item)
-        db.session.delete(item)
+        order = Order(user=user,token=payload.get("token"))
+        db.session.add(order)
         db.session.commit()
+        total = 0
+        for item in cart.cart_items:
+            total += item.item.price * item.quantity
+            order_item = Order_Item(orders=order,item=item.item,name=item.item.name,price=item.item.price,description=item.item.description,quantity=item.quantity,
+                                    images=item.item.images,category=item.item.category)
+            db.session.add(order_item)
+            db.session.delete(item)
+            db.session.commit()
 
-    order.total = total
-    #Delete Cart
-    db.session.delete(cart)
-    db.session.commit()
-    create_cart(flask_login.current_user)
+        order.total = total
 
-    return "Checkout Successful"
+        #Delete Cart
+        db.session.delete(cart)
+        db.session.commit()
+        create_cart(flask_login.current_user)
+
+        helper_functions.flash_success("Success! Checked Out")
+    return render_template("orders/user_order_indiv.html", order=order, new=True)
