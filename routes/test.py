@@ -6,6 +6,7 @@ from database_models.CartDBModel import *
 from database import db
 import flask_login
 from sqlalchemy import text
+import secrets
 from flask_mail import Message
 import mail
 import stripe
@@ -73,11 +74,14 @@ def admin_required():
 
 
 
-@blueprint.route("/admin_required2")
-@helper_functions.admin_required
+@blueprint.route("/test/orders")
 @flask_login.login_required
 def admin_required2():
-    return("Hello")
+    print(flask_login.current_user.is_authenticated)
+    print(flask_login.current_user.username)
+    print(flask_login.current_user.order)
+    print(flask_login.current_user.order[0].order_items[0].item.name)
+    return "SOMETHING"
 
 
 
@@ -90,7 +94,7 @@ def admin_required2():
 def checkout():
     cart = flask_login.current_user.cart.cart_items
     if len(cart) <= 0:
-        return "Cart Empty"
+        return redirect(url_for("cart.readcart"))
 
     items = []
     for item in cart:

@@ -11,6 +11,7 @@ import routes.InventoryManagement as inventory
 import routes.cart as cart
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
+import database_models.OrderDBModel
 import flask_login
 import errors.page_not_found, errors.permission_denied
 from flask_wtf import CSRFProtect
