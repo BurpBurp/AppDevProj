@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% set active_page = "totp" %}
+
+{% block head %}
+<title>Register TOTP</title>
+{% endblock %}
+
+
+{% block headscript %}
+    document.addEventListener('DOMContentLoaded', function() {
+        generate()
+    }, false);
+{% endblock %}
+
+
+
+{% block main %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-sm-12 col-xs-12">
+                <h3>Register TOTP</h3>
+                <ol>
+                    <li>Download Google Authenticator App</li>
+                    <li>Enter Secret Or Scan QR Code <div class="qr-code"></div></li>
+                    <li>Enter Code To The Right</li>
+                </ol>
+                <form>
+                    <div class="mb-3">
+                      <label for="totp_secret" class="form-label">Secret</label>
+                      <input type="text" class="form-control" id="totp_secret" aria-describedby="emailHelp" disabled value="{{ secret }}">
+                      <div id="totp_secret_help" class="form-text">Enter this code into Google Authenticator</div>
+                      
+                    </div>
+                    <div class="text-center">
+                        <button class="btn btn-primary text-center" type="button" onclick="copySecret()">Copy Secret</button>
+                    </div>   
+                </form>
+            </div>
+            <div class="col-md-7 col-sm-12 col-xs-12 ms-auto">
+                <div class="ms-5 mt-3">
+                    <form action="" method="post" class="" novalidate>
+                        <fieldset class="form-group row g-3">
+                            <legend>Generated OTP</legend>
+                            {{ form.hidden_tag () }}
+                            <div class="form-floating col-md-12">
+                                {% if form.otp.errors %}
+                                    {{ form.otp(class="form-control is-invalid",placeholder="a") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.otp.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.otp(class="form-control",placeholder="a") }}
+                                {% endif %}
+                                {{ form.otp.label }}
+                            </div>
+                        </fieldset>
+                        <div class="text-center mt-3">
+                            {{ form.submit(class='btn btn-primary') }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        function copySecret() {
+          /* Get the text field */
+          var copyText = document.getElementById("totp_secret");
+      
+          /* Select the text field */
+          copyText.select();
+          copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+      
+          /* Copy the text inside the text field */
+          navigator.clipboard.writeText(copyText.value)
+      
+          flash("Copied Secret to clipboard")
+        }
+
+        function generate() {
+            var qrcode = new QRCode(document.querySelector(".qr-code"), {
+                text: `{{ totp_uri | safe }}`,
+                width: 180, //default 128
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        } 
+
+      </script>
+{% endblock %}

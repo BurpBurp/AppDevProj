@@ -1,3 +1,4 @@
+# Darwin's Stuff
 from sqlalchemy import select, exc, func, and_
 from numbers import Number
 import helper_functions
@@ -20,6 +21,7 @@ class User(db.Model, UserMixin):
     reset_token = db.Column(db.String)
     profile_pic = db.Column(db.String, default="default.png")
     date_created = db.Column(db.DateTime(), default=func.now())
+    totp_secret = db.Column(db.String)
 
     def get_role_str(self):
         match self.role:
@@ -53,6 +55,12 @@ class User(db.Model, UserMixin):
         self.password = generate_password_hash(new_password)
         db.session.commit()
 
+    def remove_totp(self,current_password,is_admin=False):
+        if check_password_hash(self.password,current_password) or is_admin:
+            self.totp_secret = None
+            db.session.commit()
+        else:
+            raise custom_exceptions.WrongPasswordError()
 
     def delete_account(self, current_password,is_admin=False):
         if check_password_hash(self.password,current_password) or is_admin:
@@ -70,73 +78,74 @@ class User(db.Model, UserMixin):
         db.session.commit()
 
 
-class HelperUser:
-    def __init__(self, user: User):
-        if isinstance(user, User):
-            self.__user = user
-            self.__username = user.username
-            self.__password = user.password
-            self.__email = user.email
-            self.__id = user.id
-            self.__role = user.role
-        elif user is None:
-            print(f"user not found")
-            raise ValueError(f"user not found")
-        else:
-            print(f"Expected Type User got {type(user)}")
-            raise TypeError(f"Expected Type User got {type(user)}")
-
-    def get_id(self):
-        return self.__id
-
-    def get_username(self):
-        return self.__username
-
-    def change_password(self, old_pass, new_pass, new_pass_repeat, role=0):
-        print(old_pass, new_pass, new_pass_repeat, role)
-        if role >= 2:
-            old_pass = self.__password
-        if old_pass == self.__password:
-            if new_pass == new_pass_repeat:
-                self.__user.password = new_pass
-                self.__password = new_pass
-                db.session.commit()
-                print(self.__password)
-                return True
-            else:
-                raise custom_exceptions.PasswordNotMatchError("Passwords Dont Match")
-        else:
-            raise custom_exceptions.WrongPasswordError("Password Is Wrong")
-
-    def change_email(self, current_pass, email, role=0):
-        if get_user_by_email(email):
-            raise custom_exceptions.RepeatedEmailError()
-
-        if role >= 2:
-            current_pass = self.__password
-        if current_pass == self.__password:
-            self.__user.email = email
-            self.__email = email
-            db.session.commit()
-            return
-        else:
-            raise custom_exceptions.WrongPasswordError()
-
-    def __change_username(self, username, password):
-        if self.__password == password:
-            self.__user.username = username
-            db.session.commit()
-        else:
-            print("Password wrong")
-
-    def delete_user(self, current_password, role=0):
-        if role >= 2:
-            current_password = self.__password
-        if current_password == self.__password:
-            db.session.delete(self.__user)
-            db.session.commit()
-        else:
-            raise custom_exceptions.WrongPasswordError()
+# HelperUser Depreciated
+# class HelperUser:
+#     def __init__(self, user: User):
+#         if isinstance(user, User):
+#             self.__user = user
+#             self.__username = user.username
+#             self.__password = user.password
+#             self.__email = user.email
+#             self.__id = user.id
+#             self.__role = user.role
+#         elif user is None:
+#             print(f"user not found")
+#             raise ValueError(f"user not found")
+#         else:
+#             print(f"Expected Type User got {type(user)}")
+#             raise TypeError(f"Expected Type User got {type(user)}")
+#
+#     def get_id(self):
+#         return self.__id
+#
+#     def get_username(self):
+#         return self.__username
+#
+#     def change_password(self, old_pass, new_pass, new_pass_repeat, role=0):
+#         print(old_pass, new_pass, new_pass_repeat, role)
+#         if role >= 2:
+#             old_pass = self.__password
+#         if old_pass == self.__password:
+#             if new_pass == new_pass_repeat:
+#                 self.__user.password = new_pass
+#                 self.__password = new_pass
+#                 db.session.commit()
+#                 print(self.__password)
+#                 return True
+#             else:
+#                 raise custom_exceptions.PasswordNotMatchError("Passwords Dont Match")
+#         else:
+#             raise custom_exceptions.WrongPasswordError("Password Is Wrong")
+#
+#     def change_email(self, current_pass, email, role=0):
+#         if get_user_by_email(email):
+#             raise custom_exceptions.RepeatedEmailError()
+#
+#         if role >= 2:
+#             current_pass = self.__password
+#         if current_pass == self.__password:
+#             self.__user.email = email
+#             self.__email = email
+#             db.session.commit()
+#             return
+#         else:
+#             raise custom_exceptions.WrongPasswordError()
+#
+#     def __change_username(self, username, password):
+#         if self.__password == password:
+#             self.__user.username = username
+#             db.session.commit()
+#         else:
+#             print("Password wrong")
+#
+#     def delete_user(self, current_password, role=0):
+#         if role >= 2:
+#             current_password = self.__password
+#         if current_password == self.__password:
+#             db.session.delete(self.__user)
+#             db.session.commit()
+#         else:
+#             raise custom_exceptions.WrongPasswordError()
 
 
 class UserStats():
