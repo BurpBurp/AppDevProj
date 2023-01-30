@@ -40,7 +40,7 @@ def forgot_password():
             token = secrets.token_urlsafe(16)
             user.reset_token = token
             serialized = serializer.dumps({"id": user.id, "token": token}, salt="PasswordReset")
-            url = "http://localhost:5000" + url_for("forgot_password.forgot_password_reset", token=serialized)
+            url = url_for("forgot_password.forgot_password_reset", token=serialized, _external=True)
             print(f"<a href='{url}'>"
                   f"{url}"
                   f"</a>")

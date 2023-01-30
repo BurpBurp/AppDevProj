@@ -291,7 +291,7 @@ def request_password_reset():
     token = secrets.token_urlsafe(16)
     flask_login.current_user.reset_token = token
     serialized = serializer.dumps(token,salt="PasswordReset")
-    url = "http://localhost:5000" + url_for("crud.reset_password",token=serialized)
+    url = url_for("crud.reset_password",token=serialized, _external=True)
     print(f"<a href='{url}'>"
           f"{url}"
           f"</a>")
