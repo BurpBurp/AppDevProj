@@ -71,7 +71,7 @@ def login():
                 next_url = request.args.get("next")
                 print(next_url)
                 if user.totp_secret:
-                    token = non_timed_serializer.dumps([user.id,secrets.token_urlsafe()],salt="TOTPLogin")
+                    token = serializer.dumps([user.id,secrets.token_urlsafe()],salt="TOTPLogin")
                     return redirect(url_for("totp.totp_login",next=[next_url], token=token, remember=form.remember.data))
                 flask_login.login_user(user, remember=form.remember.data)
                 helper_functions.flash_success("Logged in Successfully")

@@ -4,7 +4,7 @@ import pyotp
 import flask_login
 from forms.TOTPForms import *
 from itsdangerous import BadSignature
-from serializer import non_timed_serializer
+from serializer import non_timed_serializer, serializer
 import custom_exceptions
 import sqlalchemy.exc
 
@@ -93,7 +93,7 @@ def ajax_remove_totp(id):
 def totp_login(token):
     form = LoginTOTP()
     try:
-        user = non_timed_serializer.loads(token,salt="TOTPLogin")
+        user = serializer.loads(token,salt="TOTPLogin",max_age=180)
 
     except BadSignature:
         helper_functions.flash_error("Error! Invalid TOTP Redirect Token")
