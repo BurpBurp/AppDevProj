@@ -100,10 +100,10 @@ def forgot_password_reset(token):
                         try:
                             user.admin_update_password(form.new_password.data,form.confirm_new_password.data)
                             try:
-                                user.reset_token = ""
+                                user.reset_token = None
                                 db.session.commit()
                                 helper_functions.flash_success("Changed Password Successfully")
-                                return redirect(url_for("index.index"))
+                                return redirect(url_for("crud.login"))
                             except sqlalchemy.exc.SQLAlchemyError:
                                 helper_functions.flash_error("Error! Internal Server Error (SQLAlchemyError)")
                                 pass
