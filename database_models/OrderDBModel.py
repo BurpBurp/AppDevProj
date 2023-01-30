@@ -1,4 +1,4 @@
-from sqlalchemy import select, ForeignKey
+from sqlalchemy import select, ForeignKey, func
 from database import db
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Item
@@ -7,7 +7,10 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer,ForeignKey(User.id))
     total = db.Column(db.Float,default=0)
-    order_items = db.relationship("Order_Item",backref="items")
+    token = db.Column(db.String)
+    status = db.Column(db.String, default="PAID") # PAID, FULFILLED, COMPLETED
+    order_items = db.relationship("Order_Item",backref="orders")
+    date_created = db.Column(db.DateTime(), default=func.now())
 
 class Order_Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -19,3 +22,4 @@ class Order_Item(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=0)
     images = db.Column(db.PickleType,default=[])
     category = db.Column(db.String)
+    fulfilled = db.Column(db.Boolean, default=False)
