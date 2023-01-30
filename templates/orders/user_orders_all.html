@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% set active_page = "index" %}
+
+{% block head %}
+<title>Orders</title>
+{% endblock %}
+
+
+{% block main %}
+<div class="container">
+	<ul class="nav nav-tabs">
+		<li class="nav-item">
+			<a class="nav-link {{'active' if status in ('ALL',None) else '' }}" aria-current="page" href="{{ url_for('order.view_orders') if status not in ('ALL',None) else '#' }}">Current</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link {{'active' if status in ('COMPLETED') else '' }}" href="{{ url_for('order.view_orders', status='COMPLETED') if status not in ('COMPLETED') else '#' }}">Completed</a>
+		</li>
+	</ul>
+	<table class="table table-striped">
+		<tr>
+			<th>ID</th>
+			<th>Total</th>
+			<th>Status</th>
+			<th>Details</th>
+		</tr>
+
+		{% if orders | length > 0 %}
+			{% for order in orders %}
+				<tr id="order_{{ order.id }}">
+					<td>{{ order.id }}</td>
+					<td>{{ "$%.2f"|format(order.total) }}</td>
+					<td id="order_status_{{ order.id }}">{{ order.status }}</td>
+					<td><a href="{{ url_for('order.user_order_indiv',id=order.id, prev=[status]) }}" class="btn btn-primary">Details</a></td>
+				</tr>
+			{% endfor %}
+		{% else %}
+			<tr>
+				<td colspan="100%" class="text-center">There are no orders</td>
+			</tr>
+		{% endif %}
+	</table>
+</div>
+{% endblock %}

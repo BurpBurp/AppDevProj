@@ -78,3 +78,27 @@ def fulfill_item():
 
 
     return jsonify(success=1, msg="Success! Item Fulfilled", status=order.status)
+
+
+@blueprint.route("/user/orders", defaults={'status':None})
+@blueprint.route("/user/orders/<status>/")
+@flask_login.login_required
+def view_orders(status):
+    if status == "ALL":
+        status = None
+    if status:
+        orders = [order for order in flask_login.current_user.order if order.status == "COMPLETED"]
+    else:
+        orders = [order for order in flask_login.current_user.order if order.status != "COMPLETED"]
+        status = "all"
+    print(orders)
+    print(status)
+    return render_template("orders/user_orders_all.html", orders=orders, status=status.upper())
+
+
+@blueprint.route("/user/orders/order/<id>")
+@flask_login.login_required
+def user_order_indiv(id):
+    order = Order.query.filter_by(id=id).first()
+    print(order.order_items[0].fulfilled)
+    return render_template("orders/user_order_indiv.html", order=order, prev=request.args.get("prev"))

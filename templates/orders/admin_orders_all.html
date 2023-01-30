@@ -21,6 +21,9 @@ $(document).ready(function(){
 					$(me).addClass("disabled")
 					$(`#order_status_${id}`).text("COMPLETED")
 					flash(result.msg,"success")
+					if ("{{ status }}" != "ALL") {
+						$(`#order_${id}`).remove()
+					}
 				} else {
 					flash(result.msg,"error")
 				}
