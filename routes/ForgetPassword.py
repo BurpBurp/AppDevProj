@@ -71,7 +71,6 @@ def forgot_password_reset(token):
             return redirect(url_for("index.index"))
     except SignatureExpired:
         helper_functions.flash_error("Token Has Expired")
-        db.session.commit()
         return redirect(url_for("index.index"))
     except BadSignature:
         helper_functions.flash_error("Token Is Invalid")
