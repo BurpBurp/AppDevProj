@@ -100,7 +100,7 @@ def forgot_password_reset(token):
                                 return redirect(url_for("crud.login"))
                             except sqlalchemy.exc.SQLAlchemyError:
                                 helper_functions.flash_error("Error! Internal Server Error (SQLAlchemyError)")
-                                pass
+                                return redirect(url_for("index.index"))
                         except custom_exceptions.PasswordNotMatchError:
                             form.new_password.errors.append("Passwords do not match")
                             form.confirm_new_password.errors.append("Passwords do not match")
