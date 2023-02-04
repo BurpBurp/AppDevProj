@@ -55,7 +55,7 @@ def admin_order_indiv(id):
     print(order.order_items[0].fulfilled)
     return render_template("orders/admin_order_indiv.html", order=order, prev=request.args.get("prev"))
 
-@blueprint.route("/admin/orders/order/fulfill", methods=["GET","POST"])
+@blueprint.route("/admin/orders/order/fulfill", methods=["POST"])
 @flask_login.login_required
 @helper_functions.admin_required
 def fulfill_item():
