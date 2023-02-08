@@ -21,7 +21,11 @@ blueprint = Blueprint("cart", __name__, template_folder="templates")
 @flask_login.login_required
 def read_cart():
     cart = flask_login.current_user.cart.cart_items
-    return render_template("Checkout/readcart_test.html",cart=cart)
+    total = 0
+    for i in cart:
+        total += (i.item.price*i.quantity)
+    print(total)
+    return render_template("Checkout/readcart_test.html",cart=cart,total=total)
 
 @blueprint.route("/cart/add_to_cart/<id>/", methods=["GET","POST"])
 @flask_login.login_required
