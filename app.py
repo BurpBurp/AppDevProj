@@ -36,7 +36,6 @@ def create_app():
     init_flask_login_service(app)
     register_errors(app)
     register_blueprints(app)
-    stripe.api_key = "sk_test_51MDlHYDQzRgNH5IUgsbdpkS3Vg5w2Xk0tAedq4Rn4cqKXGkFHFqTc2JoYqfpVCExKl41A8Z5lyieh3IJDTiyllX700gzt5Jila"
     Session(app)  # Start Sever Side Session
     return app
 
@@ -75,7 +74,7 @@ def register_blueprints(app: Flask):
     app.register_blueprint(cart.blueprint)
     app.register_blueprint(forgot.blueprint)
     app.register_blueprint(totp.blueprint)
-    app.register_blueprint(orders.blueprint)
+    app.register_blueprint(store.blueprint)
 
 def setup_database(app: Flask):
     with app.app_context():

@@ -57,7 +57,7 @@
                         <a class="nav-link {{ 'active' if active_page == 'index' else '' }}" aria-current="page" href="{{ '#' if active_page == 'index' else url_for('index.index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Shop</a>
+                        <a class="nav-link {{ 'active' if active_page == 'Shop' else '' }}" href="{{ url_for('Store.displayitem' )}}">Shop</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Contact Us</a>

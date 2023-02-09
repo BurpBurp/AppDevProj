@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% set active_page = "Shop" %}
+
+{% block head %}
+<title>Index</title>
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <h1 class="text-center">Shop</h1>
+  <div class="row justify-content-center">
+      {% for i in itemsList %}
+      <div class="col-auto">
+        <div class="card col-auto mt-3" style="width: 18rem;" >
+            <div>
+                <img src="{{ url_for('static', filename='items/' + i.images[0]) }}" onclick="location.href='{{url_for('Store.itempage',id=i.id)}}'" class="card-img-top mx-0 w-100" style="object-fit:cover; height:200px;">
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{i.name}}</h5>
+                <h6 class="card-text">{{i.description}}</h6>
+                <p class="card-text">{{ "$%.2f"|format(i.price) }}</p>
+                <a href="#" class="btn btn-primary float-end">Add To Cart</a>
+            </div>
+        </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+{% endblock %}
