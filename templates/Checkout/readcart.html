@@ -97,7 +97,7 @@ background-color: #d3d3d3;
 
                   <div class="row mb-4 d-flex justify-content-center align-items-center">
                     <div class="col-md-2 col-lg-2 col-xl-2">
-                        <img src="{{ url_for('static', filename= 'items' + i.item.images[0]) }}" alt="">
+                        <img src="{{ url_for('static', filename= 'items/' + i.item.images[0]) }}" alt="" class="img-fluid">
                     </div>
                     <div class="col-md-3 col-lg-3 col-xl-3 px-4 py-4 text-center">
                       <h5 class="text-capitalize">{{ i.item.name }}</h5>
@@ -192,7 +192,7 @@ background-color: #d3d3d3;
                     {% for i in cart%}
                   <div class="d-flex justify-content-between mb-4">
                     <h5 class="text-capitalize">{{ i.item.name }}</h5>
-                    <h5><span id="item-total-{{ i.id }}">{{ "$%.2f"|format(i.item.price*i.quantity) }}</span></h5>
+                    <h5>$<span id="item-total-{{ i.id }}">{{ "%.2f"|format(i.item.price*i.quantity) }}</span></h5>
                   </div>
                     {% endfor %}
 
@@ -201,7 +201,7 @@ background-color: #d3d3d3;
 
                   <div class="d-flex justify-content-between mb-5">
                     <h4 class="text-uppercase">Total:</h4>
-                    <h2><span id="total">{{ "$%.2f"|format(total) }}</span></h2>
+                    <h2>$<span id="total">{{ "%.2f"|format(total) }}</span></h2>
                   </div>
                     <div class="text-center">
                         <a type="button" class="btn btn-primary d-flex py-3 justify-content-center" href="{{ url_for('cart.checkout') }}"><h5>Checkout</h5></a>
