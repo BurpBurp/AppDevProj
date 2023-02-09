@@ -10,3 +10,16 @@ blueprint = Blueprint("Store", __name__, template_folder="templates")
 def displayitem():
     item = Item.query.all()
     return render_template("inventory/Store.html", itemsList= item)
+
+@blueprint.route("/Store/item/<id>/")
+def itempage(id):
+    item = Item.query.filter_by(id=id).first()
+    if item:
+        return render_template("inventory/itempage.html", item=item)
+    else:
+        helper_functions.flash_error("Item does not exist")
+        return redirect(url_for("Store.displayitem"))
+
+
+
+

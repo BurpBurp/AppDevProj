@@ -10,7 +10,7 @@ class AddItemForm(FlaskForm):
     quantity = IntegerField("Quantity",validators=[DataRequired("Please enter number of items to add"), NumberRange(min=0, message="Quantity cannot be less than 0")])
     price = DecimalField("Price of Item",places=2, validators=[DataRequired("Please enter price of item"), NumberRange(min=0, message="Rich man FOC?")])
     image = MultipleFileField("Picture of Item", validators=[MultiFileAllowed(["jpg", "png", "jpeg"],message=".jpg, .png or .jpeg File Required")])
-    category = StringField("Type of Item")
+    description = StringField("Description of Item", validators=[DataRequired("Please enter description of item")])
     submit = SubmitField("Add Item")
 
 class UpdateItemForm(FlaskForm):
@@ -18,7 +18,7 @@ class UpdateItemForm(FlaskForm):
     quantity = IntegerField("Quantity",validators=[DataRequired(), NumberRange(min=0, message="Quantity cannot be less than 0")])
     price = DecimalField("Price of Item", validators=[DataRequired(), NumberRange(min=0, message="Rich man FOC?")])
     image = MultipleFileField("Picture of Item", validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg'])])
-    category = StringField("Type of Item")
+    description = StringField("Description of Item", validators=[DataRequired("Please enter description of item")])
     submit = SubmitField("Update Item")
 
 

@@ -12,6 +12,7 @@
     <th>Item Name</th>
     <th>Quantity</th>
     <th>Price($SGD)</th>
+    <th>Description</th>
     <th>Update</th>
     <th>Delete</th>
   </tr>
@@ -20,6 +21,7 @@
             <td>{{ i.name }}</td>
             <td>{{ i.quantity }}</td>
             <td>{{ "$%.2f"|format(i.price) }}</td>
+            <td>{{ i.description }}</td>
             <td><a class="btn btn-warning" href="{{url_for('InventoryManagement.UpdateInventory', id = i.id)}}/">Update</a></td>
             <td><a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#DeleteItem">Delete</a></td>
         </tr>

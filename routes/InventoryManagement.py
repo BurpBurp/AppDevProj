@@ -39,7 +39,7 @@ def AddInventory():
                 print(path)
 
 
-            item = Item(name=form.name.data,price=form.price.data,quantity=form.quantity.data,images=files_filenames)
+            item = Item(name=form.name.data,price=form.price.data,quantity=form.quantity.data,description=form.description.data,images=files_filenames)
             db.session.add(item)
             db.session.commit()
             print(item.images)
@@ -59,11 +59,13 @@ def UpdateInventory(id):
         form.name.data = item.name
         form.quantity.data = item.quantity
         form.price.data = item.price
+        form.description.data = item.description
         return render_template("inventory/UpdateForm.html", form=form, item=item)
     elif request.method == "POST":
         item.name = request.form['name']
         item.quantity = request.form['quantity']
         item.price = request.form['price']
+        item.description = request.form['description']
         return redirect(url_for("InventoryManagement.ManageInventory"))
 
 @blueprint.route("/ManageInventory/DeleteItem/<id>/", methods=["GET"])
