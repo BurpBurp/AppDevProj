@@ -3,11 +3,16 @@ from flask import Blueprint, session, redirect, url_for, render_template, jsonif
 import helper_functions
 from database_models.UserDBModel import *
 from database_models.CartDBModel import *
+from database_models.OrderDBModel import *
 from database import db
 import flask_login
 from sqlalchemy import text
+import secrets
+from serializer import non_timed_serializer
+from itsdangerous import BadSignature
 from flask_mail import Message
 import mail
+import stripe
 
 blueprint = Blueprint("test", __name__, template_folder="templates")
 
@@ -40,9 +45,10 @@ def test_add_cart():
 
 @blueprint.route("/test_add_item")
 def test_add_item():
-    item = Item(name="Bread",price=20,description="Bread, Bread",category="Foodstuffs")
-    db.session.add(item)
-    db.session.commit()
+    for i in range(5):
+        item = Item(name=f"Bread_{i}",price=20,description="Bread, Bread",category="Foodstuffs")
+        db.session.add(item)
+        db.session.commit()
     return("HI")
 
 @blueprint.route("/test_add_to_cart")
@@ -72,10 +78,20 @@ def admin_required():
 
 
 
-@blueprint.route("/admin_required2")
-@helper_functions.admin_required
+@blueprint.route("/test/orders")
 @flask_login.login_required
 def admin_required2():
-    return("Hello")
+    print(flask_login.current_user.is_authenticated)
+    print(flask_login.current_user.username)
+    print(flask_login.current_user.order)
+    print(flask_login.current_user.order[0].order_items[0].item.name)
+    return "SOMETHING"
+
+
+
+
+
+
+
 
 

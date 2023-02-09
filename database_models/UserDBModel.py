@@ -15,6 +15,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String, nullable=False)
     role = db.Column(db.Integer, default=0)  # 0 - User, 1 - Employee, 2 - Admin
     cart = db.relationship("Cart", backref="user", uselist=False)
+    order = db.relationship("Order", backref="user")
     f_name = db.Column(db.String, nullable=False)
     l_name = db.Column(db.String, nullable=False)
     reset_token = db.Column(db.String)

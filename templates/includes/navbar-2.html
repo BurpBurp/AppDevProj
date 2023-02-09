@@ -13,18 +13,31 @@
                         <a href="{{ url_for('crud.login' )}}" class="btn btn-primary align-middle" role="button">Login</a>
                         <a href="{{ url_for('crud.signup' )}}" class="btn btn-secondary align-middle" role="button">Sign Up</a>
                     {% else %}
-                        <div class="dropstart bg-secondary text-light p-1 rounded mt-auto">
-                            <div class="dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">
-                                <img  src="{{url_for('static', filename='profiles/' + current_user.profile_pic)}}" height="35px" width="35px" class="rounded-circle me-1">
-                                <span class="text-light d-lg-inline-block d-none">{{ current_user.f_name }} {{ current_user.l_name }}</span>
+                        <div>
+                            <div class="d-inline-block me-1">
+                                <a href="{{ url_for('cart.read_cart') }}" class="btn">
+                                    <span class="position-relative top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                                    {{ current_user.cart.cart_items | length }}
+                                    <span class="visually-hidden">cart items</span>
+                                </span>
+                                    <i class="fa-solid fa-cart-shopping text-light fa-lg"></i>
+                                </a>
                             </div>
-                
-                
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                <li><a class="dropdown-item" href="{{url_for('crud.update')}}?id={{current_user.id}}">Edit Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('crud.signout') }}">Signout</a></li>
-                            </ul>
+
+                            <div class="dropstart bg-secondary text-light p-1 rounded mt-auto d-inline-block">
+                                <div class="dropdown-toggle" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">
+                                    <img  src="{{url_for('static', filename='profiles/' + current_user.profile_pic)}}" height="35px" width="35px" class="rounded-circle me-1">
+                                    <span class="text-light d-lg-inline-block d-none">{{ current_user.f_name }} {{ current_user.l_name }}</span>
+                                </div>
+
+
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <li><a class="dropdown-item" href="{{url_for('order.view_orders')}}">View Orders</a></li>
+                                    <li><a class="dropdown-item" href="{{url_for('crud.update')}}?id={{current_user.id}}">Edit Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('crud.signout') }}">Signout</a></li>
+                                </ul>
+                            </div>
                         </div>
                     {% endif %}
                 </div>
@@ -57,7 +70,7 @@
                             <ul class="dropdown-menu" aria-labelledby="AdminNavbarDropdownLink">
                                 <li><a class="dropdown-item {{ 'active' if subpage == 'users' else '' }}" href="{{ url_for('admin.admin') }}">User Management</a></li>
                                 <li><a class="dropdown-item {{ 'active' if subpage == 'DisplayInventory' else '' }}" href="{{ url_for('InventoryManagement.ManageInventory') }}">Inventory Management</a></li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('order.admin_orders') }}">Order Management</a></li>
                             </ul>
                         </li>
                     {% endif %}

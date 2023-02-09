@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% set active_page = "admin_order_all" %}
+
+{% block head %}
+<title>Orders</title>
+{% endblock %}
+
+<script>
+{% block headscript %}
+$(document).ready(function(){
+	$(".complete-button").click(function(e){
+		me = $(this)
+		id = $(this).val()
+		console.log(id)
+		e.preventDefault()
+		$.post({url:"{{ url_for('order.complete_order') }}"
+			,data: $(`#form_${id}`).serialize(),
+			success: function(result){
+				if (result.success) {
+					$(me).removeClass("complete-button")
+					$(me).addClass("disabled")
+					$(`#order_status_${id}`).text("COMPLETED")
+					flash(result.msg,"success")
+					if ("{{ status }}" != "ALL") {
+						$(`#order_${id}`).remove()
+						console.log($('.order-table tr').length)
+						if ($('.order-table .order-item').length <= 0) {
+                             $('.order-table').append('<tr><td colspan="100%" class="text-center">There are no orders</td></tr>')
+                        }
+					}
+				} else {
+					flash(result.msg,"error")
+				}
+			}
+		});
+	});
+})
+
+
+{% endblock %}
+</script>
+
+{% block main %}
+<div class="container">
+	<ul class="nav nav-tabs">
+		<li class="nav-item">
+			<a class="nav-link {{'active' if status in ('ALL',None) else '' }}" aria-current="page" href="{{ url_for('order.admin_orders') if status not in ('ALL',None) else '#' }}">All</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link {{'active' if status in ('PAID') else '' }}" href="{{ url_for('order.admin_orders', status='PAID') if status not in ('PAID') else '#' }}">In Progress</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link {{'active' if status in ('FULFILLED') else '' }}" href="{{ url_for('order.admin_orders', status='FULFILLED') if status not in ('FULFILLED') else '#' }}">Fulfilled</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link {{'active' if status in ('COMPLETED') else '' }}" href="{{ url_for('order.admin_orders', status='COMPLETED') if status not in ('COMPLETED') else '#' }}">Completed</a>
+		</li>
+	</ul>
+	<table class="table table-striped order-table">
+		<tr>
+			<th>ID</th>
+			<th>User</th>
+			<th>Total</th>
+			<th>Status</th>
+			<th>Details</th>
+			{% if status != "COMPLETED" %}
+				<th>Complete</th>
+			{% endif %}
+		</tr>
+		{% if orders | length > 0 %}
+			{% for order in orders %}
+				<tr id="order_{{ order.id }}" class="order-item">
+					<td>{{ order.id }}</td>
+					<td>{{ order.user.username }}</td>
+					<td>{{ "$%.2f"|format(order.total) }}</td>
+					<td id="order_status_{{ order.id }}">{{ order.status }}</td>
+					<td><a href="{{ url_for('order.admin_order_indiv',id=order.id, prev=[status]) }}" class="btn btn-primary">Details</a></td>
+					{% if status != "COMPLETED" %}
+						<td>
+							<form id="form_{{ order.id }}" method="post">
+								<input type="hidden" name="order-id" value="{{ order.id }}">
+								<button class="btn btn-success {{ 'disabled' if order.status == 'COMPLETED' else 'complete-button' }}" id="order_complete_{{ order.id }}" type="submit" value="{{ order.id }}">Complete</button>
+							</form>
+						</td>
+					{% endif %}
+				</tr>
+			{% endfor %}
+		{% else %}
+			<tr>
+				<td colspan="100%" class="text-center">There are no orders</td>
+			</tr>
+		{% endif %}
+	</table>
+</div>
+{% endblock %}

@@ -40,7 +40,7 @@ def forgot_password():
             token = secrets.token_urlsafe(16)
             user.reset_token = token
             serialized = serializer.dumps({"id": user.id, "token": token}, salt="PasswordReset")
-            url = "http://localhost:5000" + url_for("forgot_password.forgot_password_reset", token=serialized)
+            url = url_for("forgot_password.forgot_password_reset", token=serialized, _external=True)
             print(f"<a href='{url}'>"
                   f"{url}"
                   f"</a>")
@@ -70,13 +70,7 @@ def forgot_password_reset(token):
             helper_functions.flash_error("Token Is Invalid")
             return redirect(url_for("index.index"))
     except SignatureExpired:
-        user = User.query.filter_by(reset_token=token.get("token"),id=token.get("id")).first()
-        if not user:
-            helper_functions.flash_error("Token Is Invalid")
-            return redirect(url_for("index.index"))
         helper_functions.flash_error("Token Has Expired")
-        user.reset_token = ""
-        db.session.commit()
         return redirect(url_for("index.index"))
     except BadSignature:
         helper_functions.flash_error("Token Is Invalid")
@@ -100,13 +94,13 @@ def forgot_password_reset(token):
                         try:
                             user.admin_update_password(form.new_password.data,form.confirm_new_password.data)
                             try:
-                                user.reset_token = ""
+                                user.reset_token = None
                                 db.session.commit()
                                 helper_functions.flash_success("Changed Password Successfully")
-                                return redirect(url_for("index.index"))
+                                return redirect(url_for("crud.login"))
                             except sqlalchemy.exc.SQLAlchemyError:
                                 helper_functions.flash_error("Error! Internal Server Error (SQLAlchemyError)")
-                                pass
+                                return redirect(url_for("index.index"))
                         except custom_exceptions.PasswordNotMatchError:
                             form.new_password.errors.append("Passwords do not match")
                             form.confirm_new_password.errors.append("Passwords do not match")

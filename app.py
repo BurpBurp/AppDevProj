@@ -12,12 +12,15 @@ import routes.InventoryManagement as inventory
 import routes.cart as cart
 import routes.ForgetPassword as forgot
 import routes.totp as totp
+import routes.orders as orders
 
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
+import database_models.OrderDBModel
 import flask_login
 import errors.page_not_found, errors.permission_denied
 from flask_wtf import CSRFProtect
+import stripe
 
 login_manager = flask_login.LoginManager()
 
@@ -82,6 +85,8 @@ def setup_database(app: Flask):
 def user_loader(id):
     user = User.query.filter_by(id=id).first()
     return user
+
+
 
 
 if __name__ == "__main__":
