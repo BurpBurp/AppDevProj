@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% set active_page = "Shop" %}
+
+{% block head %}
+<title>Index</title>
+{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="row">
+      <div class="col-xl-6 col-lg-12">
+          <img src="{{ url_for('static', filename='items/' + item.images[0] )}}" alt="" class="rounded d-block float-start mt-2 ms-2 img-fluid" >
+      </div>
+      <div class="col-xl-6 col-lg-12">
+          <h1>{{  item.name }}</h1>
+        <h4>{{  item.description }}</h4>
+        <p>{{  "$%.2f"|format(item.price) }}</p>
+      </div>
+  </div>
+<div>
+</div>
+
+
+</div>
+{% endblock %}
