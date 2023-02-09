@@ -71,6 +71,7 @@ def register_blueprints(app: Flask):
     app.register_blueprint(cart.blueprint)
     app.register_blueprint(forgot.blueprint)
     app.register_blueprint(totp.blueprint)
+    app.register_blueprint(store.blueprint)
 
 def setup_database(app: Flask):
     with app.app_context():
