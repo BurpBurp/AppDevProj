@@ -49,7 +49,6 @@ def add_to_cart(id):
     return render_template("Checkout/addtocart.html",item=item,form=form)
     pass
 
-
 @blueprint.route("/cart/update/<id>/", methods=["GET","POST"])
 @flask_login.login_required
 def update_qty(id):
