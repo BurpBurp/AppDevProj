@@ -1,4 +1,4 @@
-from flask import Blueprint, session, redirect, url_for, request, render_template
+from flask import Blueprint, session, redirect, url_for, request, render_template,jsonify
 import flask_login
 import helper_functions
 
@@ -25,7 +25,7 @@ def read_cart():
     for i in cart:
         total += (i.item.price*i.quantity)
     print(total)
-    return render_template("Checkout/readcart_test.html",cart=cart,total=total)
+    return render_template("Checkout/readcart.html",cart=cart,total=total)
 
 @blueprint.route("/cart/add_to_cart/<id>/", methods=["GET","POST"])
 @flask_login.login_required
@@ -86,6 +86,26 @@ def deletecart():
     db.session.commit()
     create_cart(flask_login.current_user)
     return redirect(url_for("cart.read_cart"))
+
+@blueprint.route("/cart/change_quantity", methods=["POST"])
+@flask_login.login_required
+def update_quantity():
+    cart = flask_login.current_user.cart.cart_items
+    total = 0
+    id = request.form.get("cart-item-id")
+    quantity = request.form.get("quantity")
+    print(quantity)
+    if item := Cart_Item.query.filter_by(id=id).first():
+        print(item.quantity)
+        item.quantity = quantity
+        print(item.quantity)
+        db.session.commit()
+        for i in cart:
+            total += (i.item.price*i.quantity)
+        print(total)
+        print(item.quantity * item.item.price)
+        return jsonify(success=1, item_total = item.quantity * item.item.price, total=total)
+    return jsonify(success=0)
 
 @blueprint.route("/cart/checkout")
 @flask_login.login_required
