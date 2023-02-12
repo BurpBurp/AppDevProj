@@ -1,7 +1,4 @@
-from sqlalchemy import select, ForeignKey
 from database import db
-from database_models.UserDBModel import User
-import custom_exceptions
 
 
 class ContactUs(db.Model):
