@@ -22,7 +22,7 @@ blueprint = Blueprint("admin", __name__, template_folder="templates")
 def admin():
     if flask_login.current_user.role < 1:
         helper_functions.flash_error("Permission Denied")
-        abort(403)
+        return redirect(url_for('index.index'))
     else:
         match request.method:
             case "GET":

@@ -102,16 +102,16 @@ def update():
 
             if not (target_user := get_user_by_id(target_id)):
                 helper_functions.flash_error("Invalid user ID")
-                return abort(http.HTTPStatus.BAD_REQUEST)
+                return redirect(url_for('index.index'))
 
             if not (
                     target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role >= 2):
                 helper_functions.flash_error("You do not have permission to do that")
-                return abort(http.HTTPStatus.FORBIDDEN)
+                return redirect(url_for('index.index'))
 
             if flask_login.current_user.id != target_user.id and flask_login.current_user.role < target_user.role:
                 helper_functions.flash_error("You do not have permission to do that")
-                return abort(403)
+                return redirect(url_for('index.index'))
 
             if target_user.id == flask_login.current_user.id:
                 update_pass_form = forms.UpdateForm.UpdatePasswordForm(target_user_id=request.args.get("id"))
@@ -162,12 +162,12 @@ def update():
             update_image_form = forms.UpdateForm.UpdateImageForm()
             if (not (target_user := get_user_by_id(request.form.get("target_user_id")))) and request.method == "POST":
                 helper_functions.flash_error("Invalid user ID")
-                return abort(http.HTTPStatus.BAD_REQUEST)
+                return redirect(url_for('index.index'))
 
             if not (
                     target_user.id == flask_login.current_user.id or flask_login.current_user.role > target_user.role or flask_login.current_user.role == 2):
                 helper_functions.flash_error("You do not have permission to do that")
-                return abort(http.HTTPStatus.FORBIDDEN)
+                return redirect(url_for('index.index'))
 
             is_admin = False
 
