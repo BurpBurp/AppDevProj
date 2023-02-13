@@ -14,7 +14,7 @@ import mail
 blueprint = Blueprint("contact", __name__, template_folder="templates")
 
 
-@blueprint.route("/contact-us", methods=["GET", "POST"])
+@blueprint.route("/contact-us-form", methods=["GET", "POST"])
 def contact_us():
     form = ContactUsForm()
     if request.method == "GET":
@@ -26,7 +26,7 @@ def contact_us():
                                 message=form.message.data)
             db.session.add(contact)
             db.session.commit()
-            return redirect(url_for("index.index"))
+            return redirect(url_for("contact.thank_you_page"))
         print(form.errors)
         return render_template("contact/custform.html", form=form)
 
@@ -64,3 +64,12 @@ def delete_contact(id):
         db.session.commit()
         return render_template("contact/contactlist.html", contact_list=get_all_contact())
     return render_template("contact/contactlist.html", contact_list=get_all_contact())
+
+
+@blueprint.route("/contact-us")
+def contact_us_page():
+    return render_template("contact/contactus.html")
+
+@blueprint.route("/thank-you")
+def thank_you_page():
+    return render_template("contact/thankyoupage.html")
