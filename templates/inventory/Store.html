@@ -5,32 +5,59 @@
 <title>Index</title>
 {% endblock %}
 
+<script>
+{% block headscript %}
+$(document).ready(function(){
+    $(".add-to-cart").click(function(e) {
+        e.preventDefault()
+        item_id = this.value
+        $.post({url:"{{ url_for('cart.add_to_cart_ajax') }}"
+            ,data: {"quantity":$(`#quantity_${item_id}`).val(),"prev":"{{ url_for('Store.displayitem') }}","id":item_id},
+            success: function(result){
+                    if (result.success) {
+                        console.log($("#cart_badge").html())
+                        $("#cart_badge").html(result.cart_length)
+                        flash(result.msg,"success")
+                    } else {
+                        if (result.redir) {
+                            window.location = result.redir
+                        }
+                    }
+                }
+            })
+    })
+})
+{% endblock %}
+</script>
+
 {% block main %}
 <div class="container">
     <h1 class="text-center">Shop</h1>
-  <div class="row justify-content-center">
-      {% if itemsList %}
-          {% for i in itemsList %}
-          <div class="col-auto">
-            <div class="card col-auto mt-3" style="width: 18rem;" >
+    <div class="row justify-content-center">
+        {% if itemsList %}
+        {% for i in itemsList %}
+        <div class="col-auto">
+            <div class="card col-auto mt-3" style="width: 18rem;">
                 <div>
-                    <img src="{{ url_for('static', filename='items/' + i.images[0]) }}" onclick="location.href='{{url_for('Store.itempage',id=i.id)}}'" class="card-img-top mx-0 w-100" style="object-fit:cover; height:200px;">
+                    <img src="{{ url_for('static', filename='items/' + i.images[0]) }}"
+                        onclick="location.href='{{url_for('Store.itempage',id=i.id)}}'" class="card-img-top mx-0 w-100"
+                        style="object-fit:cover; height:200px;">
                 </div>
                 <div class="card-body">
                     <h5 class="card-title">{{i.name}}</h5>
                     <h6 class="card-text">{{i.description}}</h6>
                     <p class="card-text">{{ "$%.2f"|format(i.price) }}</p>
                     <form action="{{ url_for('cart.add_to_cart',id=i.id) }}" method="post">
-                        <input type="hidden" value="1" name="quantity">
-                        <button type="submit" class="btn btn-primary float-end">Add To Cart</button>
+                        <input type="hidden" value="1" name="quantity" id="quantity_{{ i.id }}">
+                        <button type="submit" class="btn btn-primary float-end add-to-cart" value="{{ i.id }}">Add To Cart</button>
                     </form>
                 </div>
             </div>
-          </div>
-          {% endfor %}
-      {% else %}
-      <h3 class="fw-light text-center">No Items Currently In Store</h3>
-      {% endif %}
-  </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <h3 class="fw-light text-center">No Items Currently In Store</h3>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

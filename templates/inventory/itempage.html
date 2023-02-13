@@ -5,6 +5,33 @@
 <title>Index</title>
 {% endblock %}
 
+<script>
+{% block headscript %}
+$(document).ready(function(){
+	$(".add-to-cart").click(function(e) {
+		e.preventDefault()
+		e.stopPropagation()
+
+		item_id = this.value
+		$.post({url:"{{ url_for('cart.add_to_cart_ajax') }}"
+			,data: {"quantity":$(`#item-quantity`).val(),"prev":"{{ url_for('Store.itempage',id=item.id) }}","id":item_id},
+			success: function(result){
+					if (result.success) {
+						console.log($("#cart_badge").html())
+						$("#cart_badge").html(result.cart_length)
+						flash(result.msg,"success")
+					} else {
+						if (result.redir) {
+							window.location = result.redir
+						}
+					}
+				}
+			})
+	})
+})
+{% endblock %}
+</script>
+
 {% block main %}
 <div class="container">
 	<div class="row">
@@ -33,7 +60,7 @@
 				</div>
 				<div class="row justify-content-end mt-1">
 					<div class="col-4 px-0">
-						<button type="submit" class="btn btn-primary float-end w-100 px-0">Add To Cart</button>
+						<button type="submit" class="btn btn-primary float-end w-100 px-0 add-to-cart" value="{{ item.id }}">Add To Cart</button>
 					</div>		
 				</div>
 			</form>
