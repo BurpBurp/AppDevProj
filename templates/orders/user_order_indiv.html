@@ -39,7 +39,7 @@
 		<tr id="item_{{ order.order_items[item].id }}">
 			<td>{{ item + 1 }}</td>
 			<td>{{ order.order_items[item].name }}</td>
-			<td>{{ order.order_items[item].price }}</td>
+			<td>{{ "$%.2f"|format(order.order_items[item].price ) }}</td>
 			<td>{{ order.order_items[item].description }}</td>
 			<td>{{ order.order_items[item].quantity }}</td>
 		</tr>

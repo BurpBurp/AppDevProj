@@ -9,6 +9,7 @@ import routes.crud as crud
 import routes.index as index
 import routes.admin as admin
 import routes.InventoryManagement as inventory
+import routes.contact_us as contact
 import routes.cart as cart
 import routes.ForgetPassword as forgot
 import routes.totp as totp
@@ -17,6 +18,7 @@ import routes.store as store
 
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
+from database_models.ContactDBModel import ContactUs
 import database_models.OrderDBModel
 import flask_login
 import errors.page_not_found, errors.permission_denied
@@ -73,6 +75,7 @@ def register_blueprints(app: Flask):
     app.register_blueprint(index.blueprint)  # Register index routes
     app.register_blueprint(admin.blueprint)  # Register Admin Routes
     app.register_blueprint(inventory.blueprint)  # Register Inventory Route
+    app.register_blueprint(contact.blueprint)  # Register contact Route
     app.register_blueprint(cart.blueprint)
     app.register_blueprint(forgot.blueprint)
     app.register_blueprint(totp.blueprint)
@@ -97,3 +100,5 @@ if __name__ == "__main__":
     if not os.path.isfile('instance/master.db'):
         setup_database(app)
     app.run()
+
+

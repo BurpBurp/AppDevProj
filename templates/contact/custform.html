@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Contact Us Form</title>
+
+
+{% endblock %}
+
+{% block main %}
+{{ "Update" if update else "" }}
+<div class="container justify-content-center min-vh-100 d-flex align-items-center">
+    <div class="container w-auto">
+        <div class="row justify-content-center">
+            <form action="#" method="post" class="col-md-6 shadow-lg rounded p-5">
+                <img src="{{ url_for('static',filename='Logo.png') }}" alt="" width="200">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group row g-3">
+                    <legend>Contact Us Form</legend>
+                    <div class=" col-md-auto">
+                        {{ form.name.label }}
+                        {{ form.name }}
+                    </div>
+
+                    <div class=" col-md-8">
+                        {{ form.email.label }}
+                        {{ form.email }}
+                    </div>
+
+                    <div class=" col-md-12">
+                        {{ form.phone_number.label }}
+                        {{ form.phone_number }}
+                    </div>
+
+                    <div class=" col-md-12">
+                        {{ form.message.label }}
+                        {{ form.message }}
+                    </div>
+
+                    <div class="col"> {{ form.submit(class="btn btn-primary float-end") }} </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+
