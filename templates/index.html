@@ -6,27 +6,45 @@
 {% endblock %}
 
 {% block main %}
-<div id="carouselProducts" class="carousel slide container-fluid p-0" data-bs-touch="false" data-bs-interval="false">
+<div id="carouselProducts" class="carousel slide container-fluid p-0" data-bs-touch="false" data-bs-ride="carousel">
 	<div class="carousel-indicators">
 		<button type="button" data-bs-target="#carouselProducts" data-bs-slide-to="0" class="active"></button>
 		<button type="button" data-bs-target="#carouselProducts" data-bs-slide-to="1"></button>
 		<button type="button" data-bs-target="#carouselProducts" data-bs-slide-to="2"></button>
 	</div>
 	<div class="carousel-inner">
-		<div class="carousel-item active position-relative">
+		<div class="carousel-item active position-relative" data-bs-interval="5000">
 			<img src="{{ url_for('static', filename='HomeCarousel/img1.jpg') }}" alt="Image Placeholder" class="d-block w-100" style="max-height: 640px;">
 			<div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0,0,0,0.5);"></div>
-			<h1 class="position-absolute top-50 start-50 text-light translate-middle">KH Wares</h1>
+			<div class="position-absolute top-50 start-50 text-light translate-middle text-center">
+				<h1 style="font-size: 50px;">KH Wares</h1>
+				<h3>Epitome of quality and durability</h3>
+			</div>
+			<div class="carousel-caption">
+				<a href="{{ url_for('Store.displayitem') }}" class="btn btn-secondary	" style="width: max-content;">SHOP NOW!</a>
+			</div>
 		</div>
-		<div class="carousel-item position-relative">
+		<div class="carousel-item position-relative" data-bs-interval="5000">
 			<img src="{{ url_for('static', filename='HomeCarousel/img2.jpg') }}" alt="Image Placeholder" class="d-block w-100" style="max-height: 640px">
 			<div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0,0,0,0.5);"></div>
-			<h1 class="position-absolute top-50 start-50 text-light translate-middle">Shop</h1>
+			<div class="position-absolute top-50 start-50 text-light translate-middle text-center">
+				<h1 style="font-size: 50px;">KH Wares</h1>
+				<h3>Over 50 years of quality</h3>
+			</div>
+			<div class="carousel-caption">
+				<a href="{{ url_for('Store.displayitem') }}" class="btn btn-secondary	" style="width: max-content;">SHOP NOW!</a>
+			</div>
 		</div>
-		<div class="carousel-item position-relative">
+		<div class="carousel-item position-relative" data-bs-interval="5000">
 			<img src="{{ url_for('static', filename='HomeCarousel/img3.jpg') }}" alt="Image Placeholder" class="d-block w-100" style="max-height: 640px">
 			<div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0,0,0,0.5);"></div>
-			<h1 class="position-absolute top-50 start-50 text-light translate-middle">Contact</h1>
+			<div class="position-absolute top-50 start-50 text-light translate-middle text-center">
+				<h1 style="font-size: 50px;">KH Wares</h1>
+				<h3>Bringing the ease to cooking</h3>
+			</div>
+			<div class="carousel-caption">
+				<a href="{{ url_for('Store.displayitem') }}" class="btn btn-secondary	" style="width: max-content;">SHOP NOW!</a>
+			</div>
 		</div>
 	</div>
 	<button class="carousel-control-prev" type="button" data-bs-target="#carouselProducts" data-bs-slide="prev">
