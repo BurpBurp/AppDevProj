@@ -75,6 +75,13 @@ background-color: #d3d3d3;
 
 <section class="h-100 h-custom">
   <div class="container py-5 h-100">
+
+      <div>
+          <h6 class="mb-0 pb-5"><a href="{{ url_for('Store.displayitem') }}" class="text-body">
+              <i class="fas fa-long-arrow-alt-left me-2"></i>Back to shop</a>
+          </h6>
+      </div>
+
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-12">
         <div class="card card-registration card-registration-2" style="border-radius: 15px;">
@@ -178,13 +185,6 @@ background-color: #d3d3d3;
                     <h3>No Items in Cart</h3>
                   {% endif %}
 
-
-
-                  <div class="pt-5">
-                    <h6 class="mb-0"><a href="{{ url_for('Store.displayitem') }}" class="text-body">
-                        <i class="fas fa-long-arrow-alt-left me-2"></i>Back to shop</a>
-                    </h6>
-                  </div>
                 </div>
               </div>
 
