@@ -17,7 +17,7 @@ class UpdateItemForm(FlaskForm):
     name = StringField("Item Name",validators=[DataRequired()])
     quantity = IntegerField("Quantity",validators=[DataRequired(), NumberRange(min=0, message="Quantity cannot be less than 0")])
     price = DecimalField("Price of Item", validators=[DataRequired(), NumberRange(min=0, message="Rich man FOC?")])
-    image = MultipleFileField("Picture of Item", validators=[FileRequired(), FileAllowed(['jpg', 'png', 'jpeg'])])
+    image = MultipleFileField("Change Image", validators=[])
     description = StringField("Description of Item", validators=[DataRequired("Please enter description of item")])
     submit = SubmitField("Update Item")
 
