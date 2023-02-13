@@ -49,6 +49,29 @@ def add_to_cart(id):
     return render_template("Checkout/addtocart.html",item=item,form=form)
     pass
 
+
+@blueprint.route("/cart/add_to_cart_ajax", methods=["GET","POST"])
+def add_to_cart_ajax():
+    id = request.form.get("id")
+    if not flask_login.current_user.is_authenticated:
+        return jsonify(success=0, redir=url_for("crud.login",next=[request.form.get("prev")], custom_flash=["Please Login To Add To Cart"],_external=True))
+    form = AddToCartForm()
+    item = Item.query.filter_by(id=id).first()
+    if not item:
+        helper_functions.flash_error("Item Does Not Exist")
+        return redirect(url_for("index.index"))
+    if request.method == "POST":
+        if cart_item := Cart_Item.query.filter_by(Item_id=item.id).first():
+            cart_item.quantity += form.quantity.data
+            db.session.commit()
+        else:
+            cart_item = Cart_Item(cart=flask_login.current_user.cart,item=item,quantity=form.quantity.data)
+            db.session.add(cart_item)
+            db.session.commit()
+        print(len(flask_login.current_user.cart.cart_items))
+        return jsonify(success=1, msg=f"Added {item.name} to cart",cart_length=len(flask_login.current_user.cart.cart_items))
+
+
 @blueprint.route("/cart/update/<id>/", methods=["GET","POST"])
 @flask_login.login_required
 def update_qty(id):

@@ -85,6 +85,8 @@ def login():
         if helper_functions.check_logged_in():
             helper_functions.flash_success("Already Logged in")
             return redirect(url_for("index.index"))
+        if custom_flash := request.args.get("custom_flash"):
+            helper_functions.flash_primary(custom_flash)
         return helper_functions.helper_render("login.html", form=form)
 
 

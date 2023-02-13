@@ -16,10 +16,7 @@
                         <div>
                             <div class="d-inline-block me-1">
                                 <a href="{{ url_for('cart.read_cart') }}" class="btn">
-                                    <span class="position-relative top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                                    {{ current_user.cart.cart_items | length }}
-                                    <span class="visually-hidden">cart items</span>
-                                </span>
+                                    <span class="position-relative top-0 start-100 translate-middle badge rounded-pill bg-primary" id="cart_badge">{{ current_user.cart.cart_items | length }}</span>
                                     <i class="fa-solid fa-cart-shopping text-light fa-lg"></i>
                                 </a>
                             </div>
