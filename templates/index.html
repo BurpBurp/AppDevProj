@@ -13,14 +13,20 @@
 		<button type="button" data-bs-target="#carouselProducts" data-bs-slide-to="2"></button>
 	</div>
 	<div class="carousel-inner">
-		<div class="carousel-item active">
+		<div class="carousel-item active position-relative">
 			<img src="{{ url_for('static', filename='HomeCarousel/img1.jpg') }}" alt="Image Placeholder" class="d-block w-100" style="max-height: 640px;">
+			<div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0,0,0,0.5);"></div>
+			<h1 class="position-absolute top-50 start-50 text-light translate-middle">KH Wares</h1>
 		</div>
-		<div class="carousel-item">
+		<div class="carousel-item position-relative">
 			<img src="{{ url_for('static', filename='HomeCarousel/img2.jpg') }}" alt="Image Placeholder" class="d-block w-100" style="max-height: 640px">
+			<div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0,0,0,0.5);"></div>
+			<h1 class="position-absolute top-50 start-50 text-light translate-middle">Shop</h1>
 		</div>
-		<div class="carousel-item">
+		<div class="carousel-item position-relative">
 			<img src="{{ url_for('static', filename='HomeCarousel/img3.jpg') }}" alt="Image Placeholder" class="d-block w-100" style="max-height: 640px">
+			<div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0,0,0,0.5);"></div>
+			<h1 class="position-absolute top-50 start-50 text-light translate-middle">Contact</h1>
 		</div>
 	</div>
 	<button class="carousel-control-prev" type="button" data-bs-target="#carouselProducts" data-bs-slide="prev">
