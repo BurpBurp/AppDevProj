@@ -1,5 +1,7 @@
+<!-- Darwin's Stuff -->
 {% extends 'base.html' %}
 {% set active_page = "admin" %}
+{% set subpage = "users" %}
 
 {% block head %}
 <title>Index</title>
@@ -26,10 +28,10 @@
             <td>{{target[0].username}}</td>
             <td>{{target[0].get_role_str()}}</td>
             <td>
-                <a class="btn btn-warning" role="button" href="{{url_for('crud.update')}}?id={{target[0].id}}">Update</a>
+                <a class="btn btn-warning {{ 'disabled' if (target[0].role > current_user.role) else '' }}" role="button" href="{{url_for('crud.update')}}?id={{target[0].id}}">Update</a>
             </td>
             <td>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#AdminUserDelete_{{ target[0].id }}">
+                <button type="button" class="btn btn-danger {{ 'disabled' if ((target[0].id == current_user.id) or (target[0].role > current_user.role)) else '' }}" data-bs-toggle="modal" data-bs-target="#AdminUserDelete_{{ target[0].id }}">
                     Delete
                 </button>
             </td>

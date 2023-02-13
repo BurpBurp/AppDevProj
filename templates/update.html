@@ -1,80 +1,250 @@
+<!-- Darwin's Stuff -->
 {% extends 'base.html' %}
-{% set active_page = "update" %}
+{% if current_user.authenticated and current_user.role > 0 %}
+    {% set active_page = "admin" %}
+    {% set subpage = "update" %}
+{% else %}
+    {% set active_page = "update" %}
+{% endif %}
 
 {% block head %}
     <title>Update Page</title>
 
     <link rel="stylesheet" href="{{url_for('static', filename='css/profile-pic-change.css')}}">
-
-    {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
-        <script>
-            $(document).ready(function(){
-              $("#changePassButton").click(function(){
-                $.post({url: "{{ url_for('crud.request_password_reset') }}",
-                    success: function(result){
-                    $("#changePassForm").modal('show')
-                    console.log(result);
-                    },
-                    error: function(result){
-                        $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
-                            An Error Has Occured. Please Try Again
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>`)
-                        console.log("FAIL");
-                    }
-                });
-              });
-            });
-        </script>
-    {% endif %}
-    {% if ((current_user.role >= 2) and (not update_self)) %}
-        <script>
-            $(document).ready(function(){
-                $("#changeRoleSubmitButton").click(function(e){
-                    e.preventDefault()
-                    console.log($("#target_user_id").val())
-                    $.post({url: 
-                        "/update_role"
-                        ,data: {
-                        role: $("#role").val(),
-                        target_user_id: $("#target_user_id").val(),
-                        csrf_token: $("#csrf_token").val(),
-                    },
-                        success: function(result){
-                        $("#changeRoleForm").modal('hide')
-                        $("#flashes").append(`<div class="alert alert-success alert-dismissible" role="alert">
-                            Changed Role Successfully
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>`)
-                        $("#roletext").html(result)
-                        console.log(result);
-                        },
-                        error: function(result){
-                            switch (result.status) {
-                                case 403:
-                                    msg = "Permission Denied"
-                                    break;
-                                case 500:
-                                    msg = "An Error Occurred! Please Try Again"
-                                    break;
-                                case 400:
-                                    msg = "Bad Request! Invalid User ID"
-                                    break;
-                                default:
-                                    msg = "An Error Occurred! Please Try Again"
-                            }
-                            $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
-                                ${msg}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>`)
-                            console.log(result.status);
-                        }
-                    });
-                });
-            });
-        </script>       
-    {% endif %}
 {% endblock %}
+
+<script>
+{% block headscript %}
+$(document).ready(function(){
+{% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+
+    $("#changePassButton").click(function(){
+    $('.loadingDiv').removeClass("d-none");
+    $.post({url: "{{ url_for('crud.request_password_reset') }}",
+        success: function(result){
+        $("#changePassForm").modal('show')
+        console.log(result);
+        $('.loadingDiv').addClass("d-none");
+        },
+        error: function(result){
+            $("#flashes").append(`<div class="alert alert-danger alert-dismissible" role="alert">
+                An Error Has Occurred. Please Try Again
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`)
+            console.log("FAIL");
+            $('.loadingDiv').addClass("d-none");
+        }
+    });
+    });
+
+{% endif %}
+{% if ((current_user.role >= 2) and (not update_self)) %}
+    $("#changeRoleSubmitButton").click(function(e){
+        e.preventDefault()
+        console.log($("#target_user_id").val())
+        $.post({url:"{{ url_for('crud.update_role') }}"
+            ,data: $('#changeRoleFormInner').serialize(),
+            success: function(result){
+                if (result.success) {
+                    $("#changeRoleForm").modal('hide')
+                    flash(result.msg, "success")
+                    $("#roletext").html(result.role)
+                    console.log(result);
+                } else {
+                    $("#changeRoleForm").modal('hide')
+                    flash(result.msg, "error")
+                    console.log(result);
+                }
+            }
+        });
+    });
+{% endif %}
+
+// AJAX Update Helpers
+function add_error(parent,field_id,errors) {    
+    $(`#${parent} #${field_id}`).removeClass("is-invalid")
+    $(`#${parent} div.form-floating:has(#${field_id})`).children(".invalid-feedback").remove()
+
+    if (errors.length > 0) {
+        $(`#${parent} #${field_id}`).addClass("is-invalid")
+        for (i=0; i < errors.length; i++) {
+            node = document.createElement("div")
+            node.classList.add("invalid-feedback")
+            node.innerHTML = errors[i]
+            document.querySelector(`#${parent} div.form-floating:has(#${field_id})`).appendChild(node)
+        }
+    } 
+}
+
+function clear_errors(parent,field_id) {
+    $(`#${parent} #${field_id}`).removeClass("is-invalid")
+    $(`#${parent} div.form-floating:has(#${field_id})`).children(".invalid-feedback").remove()
+}
+
+function clear_all_errors() {
+    $(".invalid-feedback").remove()
+    $("input.is-invalid").removeClass("is-invalid")
+}
+
+function update_user_data(id) {
+    $.post({url:`/admin/get_user/${id}/`, 
+            success: function(result) {
+                if (result.success) {
+                    $("#nametext").html(`${result.data.f_name} ${result.data.l_name}`)
+                    $("#roletext").html(`${result.data.role}`)
+                    $("#emailtext").html(`${result.data.email}`)
+                    return (result.data);
+                } else {
+                    flash(result.msg,"error")
+                    return result
+                }
+            }
+    });
+}
+
+$(".modal-close").click(function(e){
+    console.log("CLOSE")
+    reset_fields({{ target_user.id }})
+    clear_all_errors()
+})
+
+function reset_fields(id) {
+    $(".form-reset-close").val("")
+    $.post({url:`/admin/get_user/${id}/`, 
+            success: function(result) {
+                if (result.success) {
+                    $("#f_name").val(`${result.data.f_name}`)
+                    $("#l_name").val(`${result.data.l_name}`)
+                    return (result.data);
+                } else {
+                    flash(result.msg,"error")
+                    return result
+                }
+            }
+    });
+}
+
+// Change Name AJAX
+    $("#changeNameFormSubmitButton").click(function(e){
+        e.preventDefault()
+        console.log($("#target_user_id").val())
+        $.post({url:"{{ url_for('crud.update_name') }}"
+            ,data: $('#changeNameFormInner').serialize(),
+            success: function(result){
+                if (result.success) {
+                    for (i=0; i < result.fields.length; i++) {
+                        clear_errors("changeNameForm",result.fields[i])
+                    }                    
+                    $("#changeNameForm").modal('hide')
+                    flash(result.msg,"success")
+                    reset_fields({{ target_user.id }})
+                    update_user_data({{ target_user.id }})
+                } else {
+                    if (result.err_list) {
+                        for (field in result.err_list) {
+                            add_error("changeNameForm",field,result.err_list[field])
+                        }
+                    } else {
+                        $("#changeNameForm").modal('hide')
+                        flash(result.msg, "error")
+                    }
+                }
+            }
+        });
+    });
+
+// Delete Account AJAX
+$("#changeDeleteFormSubmitButton").click(function(e){
+        e.preventDefault()
+        console.log("AJAX DELETE")
+        console.log($("#target_user_id").val())
+        $.post({url:"{{ url_for('crud.ajax_delete') }}"
+            ,data: $('#changeDeleteFormInner').serialize(),
+            success: function(result){
+                if (result.success) {
+                    reset_fields({{ target_user.id }})
+                    window.location = result.destination;
+                } else {
+                    if (result.err_list) {
+                        for (field in result.err_list) {
+                            add_error("changeDeleteForm",field,result.err_list[field])
+                        }
+                        $(`#changeDeleteForm #current_password`).val("")
+                    } else {
+                        $("#changeDeleteForm").modal('hide')
+                        flash(result.msg, "error")
+                    }
+                }
+            }
+        });
+    })
+
+// Update Email AJAX
+$("#changeEmailFormSubmitButton").click(function(e){
+        e.preventDefault()
+        console.log("AJAX DELETE")
+        console.log($("#target_user_id").val())
+        $.post({url:"{{ url_for('crud.ajax_change_email') }}"
+            ,data: $('#changeEmailFormInner').serialize(),
+            success: function(result){
+                if (result.success) {
+                    for (i=0; i < result.fields.length; i++) {
+                        clear_errors("changeEmailForm",result.fields[i])
+                    }                    
+                    $("#changeEmailForm").modal('hide')
+                    reset_fields({{ target_user.id }})
+                    flash(result.msg,"success")
+                    update_user_data({{ target_user.id }})
+                } else {
+                    if (result.err_list) {
+                        for (field in result.err_list) {
+                            add_error("changeEmailForm",field,result.err_list[field])
+                        }
+                        $(`#changeEmailForm #current_password`).val("")
+                    } else {
+                        $("#changeEmailForm").modal('hide')
+                        flash(result.msg, "error")
+                    }
+                }
+            }
+        });
+    })
+
+
+// Remove TOTP Ajax
+$("#removeTOTPFormSubmitButton").click(function(e){
+
+        e.preventDefault()
+        console.log("AJAX Remove TOTP")
+        console.log($("#target_user_id").val())
+        console.log($('#removeTOTPFormInner').serialize())
+        $.post({url:"{{ url_for('totp.ajax_remove_totp',id=target_user.id) }}"
+            ,data: $('#removeTOTPFormInner').serialize(),
+            success: function(result){
+                console.log(result)
+                if (result.success) {
+                    
+                    location.reload(true)
+                    flash(result.msg,"success")
+                } else {
+                    if (result.err_list) {
+                        for (field in result.err_list) {
+                            add_error("removeTOTPForm",field,result.err_list[field])
+                        }
+                        $(`#removeTOTPForm #current_password`).val("")
+                    } else {
+                        $("#RemoveTOTPForm").modal('hide')
+                        flash(result.msg, "error")
+                    }
+                }
+            }
+        });
+    })
+
+
+});
+{% endblock %}
+</script>
 
 {% block main %}
 
@@ -91,10 +261,10 @@
         </div>
         <div class="col-md-12 col-xxl-10 container-fluid">
             <div class="row-justify-content-start mb-5">
-                <h1 class="d-inline">{{ target_user.f_name }} {{ target_user.l_name }}</h1>
-                <h4 class="d-inline ms-4">Aka. {{ target_user.username }}</h4>
+                <h1 class="d-inline" id="nametext">{{ target_user.f_name }} {{ target_user.l_name }}</h1>
+                <h4 class="d-inline ms-4" id="usernametext">Aka. {{ target_user.username }}</h4>
                 <h5 id="roletext"> {{target_user.get_role_str() }}</h5>
-                <h6> {{target_user.email }}</h6>
+                <h6 id="emailtext"> {{target_user.email }}</h6>
             </div>
             <div class="row justify-content-start gx-2 mt-5">
                 <button type="button" class="btn btn-primary col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeNameForm">
@@ -121,6 +291,16 @@
                     </button>
                 {% endif %}
 
+                {% if target_user.totp_secret %}
+                    <button type="button" id="changeRoleButton" class="btn btn-warning col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#removeTOTPForm">
+                        Remove OTP
+                    </button>
+                {% elif update_self %}
+                    <a id="addTOTPButton" class="btn btn-success col-xl-2 col-md-12 m-2" href="{{ url_for('totp.register_totp') }}">
+                        Register OTP
+                    </a>
+                {% endif %}
+
                 <button type="button" class="btn btn-danger col-xl-2 col-md-12 m-2" data-bs-toggle="modal" data-bs-target="#changeDeleteForm">
                     Delete Account
                 </button>
@@ -141,7 +321,7 @@
 <div class="container-fluid">
     <div class="modal fade" id="changeNameForm" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <form action="#" method="post" class="modal-content" novalidate>
+            <form action="#" method="post" class="modal-content" id="changeNameFormInner" novalidate>
                 <div class="modal-header">
                     <h5 class="modal-title" id="changeNameFormLabel">Update Profile</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -178,8 +358,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    {{ update_name_form.submit(class="btn btn-primary float-end") }}
+                    <button type="button" class="btn btn-secondary modal-close" data-bs-dismiss="modal">Close</button>
+                    {{ update_name_form.submit(class="btn btn-primary float-end", id="changeNameFormSubmitButton") }}
                 </div>
             </form>
         </div>
@@ -268,7 +448,7 @@
 
     <div class="modal fade" id="changeEmailForm" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <form action="#" method="post" class="modal-content" novalidate>
+            <form action="#" method="post" class="modal-content" id="changeEmailFormInner" novalidate>
                 <div class="modal-header">
                     <h5 class="modal-title" id="changeEmailFormLabel">Update Profile</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -279,36 +459,36 @@
                         {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
                             <div class="form-floating col-md-12">
                                 {% if update_email_form.current_password.errors %}
-                                    {{ update_email_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                    {{ update_email_form.current_password(class="form-control form-control-lg is-invalid form-reset-close",placeholder="a") }}
                                     <div class="invalid-feedback">
                                         {% for error in update_email_form.current_password.errors %}
                                             <span>{{ error }}</span>
                                         {% endfor %}
                                     </div>
                                 {% else %}
-                                    {{ update_email_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                                    {{ update_email_form.current_password(class="form-control form-control-lg form-reset-close",placeholder="a") }}
                                 {% endif %}
                                 {{ update_email_form.current_password.label }}
                             </div>
                         {% endif %}
                         <div class="form-floating col-md-12">
                             {% if update_email_form.new_email.errors %}
-                                {{ update_email_form.new_email(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                {{ update_email_form.new_email(class="form-control form-control-lg is-invalid form-reset-close",placeholder="a") }}
                                 <div class="invalid-feedback">
                                     {% for error in update_email_form.new_email.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ update_email_form.new_email(class="form-control form-control-lg",placeholder="a") }}
+                                {{ update_email_form.new_email(class="form-control form-control-lg form-reset-close",placeholder="a") }}
                             {% endif %}
                             {{ update_email_form.new_email.label }}
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    {{ update_email_form.submit(class="btn btn-primary float-end") }}
+                    <button type="button" class="btn btn-secondary modal-close" data-bs-dismiss="modal">Close</button>
+                    {{ update_email_form.submit(class="btn btn-primary float-end",id="changeEmailFormSubmitButton") }}
                 </div>
             </form>
         </div>
@@ -317,7 +497,7 @@
 
     <div class="modal fade" id="changeDeleteForm" tabindex="-1">
         <div class="modal-dialog modal-lg">
-            <form action="#" method="post" class="modal-content" novalidate>
+            <form action="#" method="post" class="modal-content" id="changeDeleteFormInner" novalidate>
                 <div class="modal-header">
                     <h5 class="modal-title" id="changeDeleteFormLabel">Delete Account</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -326,16 +506,18 @@
                     {{ update_delete_form.hidden_tag()}}
                     <div class="row g-3">
                         {% if not ((current_user.role > target_user.role or current_user.role >= 2) and (not update_self)) %}
+                            <span>Are you sure you want to delete your account?</span>
+                            <span>Enter Your Password to Delete</span>
                             <div class="form-floating col-md-12">
                                 {% if update_delete_form.current_password.errors %}
-                                    {{ update_delete_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                    {{ update_delete_form.current_password(class="form-control form-control-lg is-invalid form-reset-close",placeholder="a") }}
                                     <div class="invalid-feedback">
                                         {% for error in update_delete_form.current_password.errors %}
                                             <span>{{ error }}</span>
                                         {% endfor %}
                                     </div>
                                 {% else %}
-                                    {{ update_delete_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                                    {{ update_delete_form.current_password(class="form-control form-control-lg form-reset-close",placeholder="a") }}
                                 {% endif %}
                                 {{ update_delete_form.current_password.label }}
                             </div>
@@ -345,8 +527,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    {{ update_delete_form.submit(class="btn btn-danger float-end") }}
+                    <button type="button" class="btn btn-secondary modal-close" data-bs-dismiss="modal">Close</button>
+                    {{ update_delete_form.submit(class="btn btn-danger float-end",id="changeDeleteFormSubmitButton") }}
                 </div>
             </form>
         </div>
@@ -377,10 +559,50 @@
         </div>
     </div>
 
+    {% if target_user.totp_secret %}
+        <div class="modal fade" id="removeTOTPForm" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <form action="{{ url_for('totp.ajax_remove_totp', id=target_user.id ) }}" method="post" class="modal-content" id="removeTOTPFormInner" novalidate>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="removeTOTPFormLabel">Remove One Time Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body container-fluid">
+                        {{ remove_totp_form.hidden_tag() }}
+                        {% if not ((current_user.role > target_user.role or current_user.role == 2) and (not update_self)) %}
+                            <div class="row g-3">
+                                <span>Enter Password to Remove OTP</span>
+                                <div class="form-floating col-md-12">
+                                    {% if remove_totp_form.current_password.errors %}
+                                        {{ remove_totp_form.current_password(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in remove_totp_form.current_password.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ remove_totp_form.current_password(class="form-control form-control-lg",placeholder="a") }}
+                                    {% endif %}
+                                    {{ remove_totp_form.current_password.label }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <span>Are you sure you want to remove OTP for user {{target_user.username}}?</span>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary modal-close" data-bs-dismiss="modal">Close</button>
+                        {{ remove_totp_form.submit(class="btn btn-danger float-end", id="removeTOTPFormSubmitButton") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
     {% if ((current_user.role >= 2) and (not update_self)) %}
         <div class="modal fade" id="changeRoleForm" tabindex="-1">
             <div class="modal-dialog modal-lg">
-                <form method="post" class="modal-content" novalidate>
+                <form method="post" class="modal-content" id="changeRoleFormInner" novalidate>
                     <div class="modal-header">
                         <h5 class="modal-title" id="changeRoleFormLabel">Change Password</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

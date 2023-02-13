@@ -3,18 +3,27 @@ from flask_session import Session
 from database import db
 import os
 import mail
+
 import routes.test as test
 import routes.crud as crud
 import routes.index as index
 import routes.admin as admin
 import routes.InventoryManagement as inventory
 import routes.contact_us as contact
+import routes.cart as cart
+import routes.ForgetPassword as forgot
+import routes.totp as totp
+import routes.orders as orders
+import routes.store as store
+
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
 from database_models.ContactDBModel import ContactUs
+import database_models.OrderDBModel
 import flask_login
 import errors.page_not_found, errors.permission_denied
 from flask_wtf import CSRFProtect
+import stripe
 
 login_manager = flask_login.LoginManager()
 
@@ -30,6 +39,7 @@ def create_app():
     init_flask_login_service(app)
     register_errors(app)
     register_blueprints(app)
+    stripe.api_key = "sk_test_51MDlHYDQzRgNH5IUgsbdpkS3Vg5w2Xk0tAedq4Rn4cqKXGkFHFqTc2JoYqfpVCExKl41A8Z5lyieh3IJDTiyllX700gzt5Jila"
     Session(app)  # Start Sever Side Session
     return app
 
@@ -66,6 +76,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(admin.blueprint)  # Register Admin Routes
     app.register_blueprint(inventory.blueprint)  # Register Inventory Route
     app.register_blueprint(contact.blueprint)  # Register contact Route
+    app.register_blueprint(cart.blueprint)
+    app.register_blueprint(forgot.blueprint)
+    app.register_blueprint(totp.blueprint)
+    app.register_blueprint(store.blueprint)
+    app.register_blueprint(orders.blueprint)
 
 def setup_database(app: Flask):
     with app.app_context():
@@ -76,6 +91,8 @@ def setup_database(app: Flask):
 def user_loader(id):
     user = User.query.filter_by(id=id).first()
     return user
+
+
 
 
 if __name__ == "__main__":

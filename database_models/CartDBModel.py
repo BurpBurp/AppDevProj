@@ -13,6 +13,7 @@ class Cart(db.Model):
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cart_items = db.relationship("Cart_Item",backref="item")
+    orders = db.relationship("Order_Item",backref="item")
     name = db.Column(db.String,nullable=False)
     price = db.Column(db.Float,nullable=False)
     description = db.Column(db.String)
@@ -27,3 +28,8 @@ class Cart_Item(db.Model):
     Item_id = db.Column(db.Integer,ForeignKey(Item.id))
     quantity = db.Column(db.Integer,default=1)
 
+def create_cart(user: User):
+    cart = Cart(user=user)
+    db.session.add(cart)
+    db.session.commit()
+    return True

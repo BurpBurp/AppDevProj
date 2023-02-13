@@ -1,3 +1,5 @@
+# Darwin's Stuff
+
 class UserUpdateError(Exception):
 
     def __init__(self, message=""):

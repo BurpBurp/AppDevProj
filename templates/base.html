@@ -1,3 +1,4 @@
+<!-- Darwin's Stuff -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,22 +7,19 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts/flash.js') }}"></script>
     
     {% block head %}{% endblock %}
+
     <script>
       var $loading = $('.loadingDiv').addClass("d-none");
-      $(document)
-      .ajaxStart(function () {
-          console.log("ShowDiv")
-          $('.loadingDiv').removeClass("d-none");
-      })
-      .ajaxStop(function () {
-          console.log("HideDiv")
-          $('.loadingDiv').addClass("d-none");
-      });
+      {% block headscript %}
+      {% endblock %}
     </script>
 
 
+    <script src="https://kit.fontawesome.com/115378d4ac.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/loader.css') }}">
 </head>
