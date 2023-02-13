@@ -53,8 +53,8 @@ def UpdateInventory(id):
     form = UpdateItemForm()
     item = Item.query.filter_by(id=id).first()
     if not item:
-            helper_functions.flash_error(f"Item with \"{id}\" not in database")
-            return redirect(url_for("InventoryManagement.ManageInventory"))
+        helper_functions.flash_error(f"Item with \"{id}\" not in database")
+        return redirect(url_for("InventoryManagement.ManageInventory"))
     if request.method == "GET":
         form.name.data = item.name
         form.quantity.data = item.quantity
@@ -62,11 +62,41 @@ def UpdateInventory(id):
         form.description.data = item.description
         return render_template("inventory/UpdateForm.html", form=form, item=item)
     elif request.method == "POST":
-        item.name = request.form['name']
-        item.quantity = request.form['quantity']
-        item.price = request.form['price']
-        item.description = request.form['description']
-        return redirect(url_for("InventoryManagement.ManageInventory"))
+        if form.validate_on_submit():
+
+            print(request.files)
+            if "image" in request.files:
+                print("Dealing With Files")
+                files_filenames = []
+                print(form.image.data)
+                for file in form.image.data:
+                    if file.filename == "":
+                        break
+
+                    if os.path.splitext(secure_filename(file.filename))[1] in (".png",".jpg",".jpeg"):
+                        file_name = f"{secrets.token_urlsafe(8)}{os.path.splitext(secure_filename(file.filename))[1]}"
+                        files_filenames.append(file_name)
+                        path = os.path.join("static", "items", file_name)
+                        file.save(path)
+                        print(path)
+                    else:
+                        helper_functions.flash_error(".jpg, .png or .jpeg File Required")
+                        return render_template("inventory/UpdateForm.html", form=form, item=item)
+                else:
+                    print("Editing File Names")
+                    item.images = files_filenames
+
+
+
+            item.name = request.form['name']
+            item.quantity = request.form['quantity']
+            item.price = request.form['price']
+            item.description = request.form['description']
+            db.session.commit()
+            return redirect(url_for("InventoryManagement.ManageInventory"))
+    print("DID NOT VALIDATE")
+    print(form.errors)
+    return render_template("inventory/UpdateForm.html", form=form, item=item)
 
 @blueprint.route("/ManageInventory/DeleteItem/<id>/", methods=["GET"])
 @flask_login.login_required
