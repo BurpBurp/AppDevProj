@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Contact Us</title>
+ <style>
+      .left-section {
+        width: 50%;
+        height: 400px;
+        float: left;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .left-header {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .left-header h1 {
+        font-style: italic;
+        margin: 0;
+      }
+      .left-image {
+        width: 80%;
+        height: 80%;
+      }
+      .square-images {
+        width: 50%;
+        height: 400px;
+        float: right;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+      }
+      .square-image {
+        width: 45%;
+        height: 45%;
+        margin: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .square-image p {
+        margin: 10px;
+        text-align: left;
+      }
+      .square-image img {
+        width: 40%;
+        height: 40%;
+        border: 1px solid black;
+        object-fit: cover;
+      }
+      .row1 {
+        width: 100%;
+        display: flex;
+      }
+      .row2 {
+        width: 100%;
+        display: flex;
+      }
+
+      h1, h2{
+        border-bottom: 1px solid;
+      }
+    </style>
+
+{% endblock %}
+
+{% block main %}
+    <div class="left-section">
+      <div class="left-header">
+        <h1>CONTACT US</h1>
+      </div>
+
+        <img class="left-image" src="{{ url_for('static', filename='contact/images/custsupportwok.jpg') }}"/>
+
+    </div>
+    <div class="square-images">
+      <div class="row1">
+        <div class="square-image">
+            <img src="{{ url_for('static', filename='contact/images/phone.png') }}"/>
+          <h2>CALL US</h2>
+            <p>Singapore: <a href="tel:91990686">9199 0686 </a></p>
+        </div>
+        <div class="square-image">
+          <img src="{{ url_for('static', filename='contact/images/email.png') }}"/>
+          <h2>MESSAGE US</h2>
+            <p>Send in a form <a href="/contact-us-form">here </a></p>
+
+        </div>
+      </div>
+      <div class="row2">
+        <div class="square-image">
+            <img src="{{ url_for('static', filename='contact/images/location.png') }}"/>
+            <h2>FIND US</h2>
+          <a href="https://goo.gl/maps/UJMcSxJ8ZLGRXBKz6"> 5062 Ang Mo Kio Industrial Park 2, Singapore</a>
+        </div>
+        <div class="square-image">
+            <img src="{{ url_for('static', filename='contact/images/info.png') }}"/>
+            <h2>INFO</h2>
+            <p>Instagram: <a href="">@khwares</a></p>
+            <p>Facebook: <a href="">khwares</a></p>
+        </div>
+      </div>
+{% endblock %}

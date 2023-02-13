@@ -60,7 +60,7 @@
                         <a class="nav-link {{ 'active' if active_page == 'Shop' else '' }}" href="{{ url_for('Store.displayitem' )}}">Shop</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Contact Us</a>
+                        <a class="nav-link" href="/contact-us">Contact Us</a>
                     </li>
                     {% if current_user.is_authenticated and current_user.role >=1 %}
                         <li class="nav-item dropdown">
