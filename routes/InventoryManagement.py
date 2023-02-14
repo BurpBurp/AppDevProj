@@ -104,6 +104,11 @@ def UpdateInventory(id):
 def DeleteInventory(id):
     item = Item.query.filter_by(id=id).first()
     if item:
+        cart_items = Cart_Item.query.all()
+        for cart_item in cart_items:
+            if cart_item.item.id == item.id:
+                db.session.delete(cart_item)
+                db.session.commit()
         db.session.delete(item)
         db.session.commit()
         message = f"The item {item.name} has been deleted from the database."

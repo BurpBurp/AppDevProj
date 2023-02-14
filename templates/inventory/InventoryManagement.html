@@ -26,9 +26,9 @@
               <td>{{ "$%.2f"|format(i.price) }}</td>
               <td class="text-truncate" style="max-width: 50px">{{ i.description }}</td>
               <td><a class="btn btn-warning" href="{{url_for('InventoryManagement.UpdateInventory', id = i.id)}}/"><i class="fas fa-edit"></i></a></td>
-              <td><a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#DeleteItem"><i class="fa fa-trash"></i></a></td>
+              <td><a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#DeleteItem_{{i.id}}"><i class="fa fa-trash"></i></a></td>
           </tr>
-          <div class="modal fade" id="DeleteItem" tabindex="-1">
+          <div class="modal fade" id="DeleteItem_{{i.id}}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">

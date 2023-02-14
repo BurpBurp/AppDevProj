@@ -42,7 +42,8 @@ def complete_order():
         return jsonify(success=0, msg="Error! Order not found")
     for item in order.order_items:
         if not item.fulfilled:
-            item.item.quantity -= item.quantity
+            if item.item:
+                item.item.quantity -= item.quantity
             item.fulfilled = True
             db.session.commit()
     order.status = "COMPLETED"
@@ -69,9 +70,11 @@ def fulfill_item():
 
     item.fulfilled = bool(request.form.get("fulfilled"))
     if bool(request.form.get("fulfilled")):
-        item.item.quantity -= item.quantity
+        if item.item:
+            item.item.quantity -= item.quantity
     else:
-        item.item.quantity += item.quantity
+        if item.item:
+            item.item.quantity += item.quantity
     db.session.commit()
 
 
