@@ -12,8 +12,8 @@ from flask_mail import Message
 import mail
 import smtplib
 
-gmail_user = 'ywps2022@gmail.com'
-gmail_password = 'jpfrxrdpsctwbuxk'
+gmail_user = 'khwaresappdev@gmail.com'
+gmail_password = 'akfxhtnsjvdokqez'
 
 
 def send_email(to, subject, message):
