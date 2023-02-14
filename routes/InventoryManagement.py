@@ -73,14 +73,14 @@ def UpdateInventory(id):
                     if file.filename == "":
                         break
 
-                    if os.path.splitext(secure_filename(file.filename))[1] in (".png",".jpg",".jpeg"):
+                    if os.path.splitext(secure_filename(file.filename))[1] in (".png", ".jpg", ".jpeg", ".jfif"):
                         file_name = f"{secrets.token_urlsafe(8)}{os.path.splitext(secure_filename(file.filename))[1]}"
                         files_filenames.append(file_name)
                         path = os.path.join("static", "items", file_name)
                         file.save(path)
                         print(path)
                     else:
-                        helper_functions.flash_error(".jpg, .png or .jpeg File Required")
+                        helper_functions.flash_error(".jpg, .png, .jfif or .jpeg File Required")
                         return render_template("inventory/UpdateForm.html", form=form, item=item)
                 else:
                     print("Editing File Names")
