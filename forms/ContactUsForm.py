@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, Email, length, NumberRange
 
 
 class ContactUsForm(FlaskForm):
-    name = StringField("Username", validators=[DataRequired(), length(1, 100)])
+    name = StringField("Name", validators=[DataRequired(), length(1, 100)])
     email = EmailField("Email", validators=[DataRequired(), Email()])
     phone_number = IntegerField("Phone Number", validators=[DataRequired(), NumberRange(30000000, 99999999)])
     message = TextAreaField("Message", validators=[DataRequired(), length(1, 5000)])
