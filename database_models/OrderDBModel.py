@@ -10,6 +10,7 @@ class Order(db.Model):
     token = db.Column(db.String)
     status = db.Column(db.String, default="PAID") # PAID, FULFILLED, COMPLETED
     order_items = db.relationship("Order_Item",backref="orders")
+    discount = db.Column(db.Float,default=0)
     date_created = db.Column(db.DateTime(), default=func.now())
 
 class Order_Item(db.Model):

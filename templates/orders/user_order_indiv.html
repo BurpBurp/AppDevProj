@@ -28,22 +28,41 @@
 		<h5 class="col-10">Status: <span id="status">{{ order.status }}</span></h5>
 	</div>
 	<table class="table table-striped">
-		<tr>
-			<th>S/N</th>
-			<th>Item</th>
-			<th>Price</th>
-			<th>Description</th>
-			<th>Quantity</th>
-		</tr>
+        <tr>
+            <th scope="row">S/N</th>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th class="text-center">Total</th>
+        </tr>
 		{% for item in range((order.order_items | length)) %}
 		<tr id="item_{{ order.order_items[item].id }}">
-			<td>{{ item + 1 }}</td>
+			<td scope="row">{{ item + 1 }}</td>
 			<td>{{ order.order_items[item].name }}</td>
 			<td>{{ "$%.2f"|format(order.order_items[item].price ) }}</td>
 			<td>{{ order.order_items[item].description }}</td>
 			<td>{{ order.order_items[item].quantity }}</td>
+            <td class="text-center">{{ "$%.2f"|format(order.order_items[item].price * order.order_items[item].quantity) }}</td>
 		</tr>
 		{% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan="4"></td>
+                <td >Sub Total:</td>
+                <td class="text-center" style="border-top: 2px solid black !important;">{{ "$%.2f" | format(order.total) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4"></td>
+                <td >Discount:</td>
+                <td class="text-center" style=" border-bottom: 2px solid black !important">{{ "$%.2f" | format(order.discount) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4"></td>
+                <td >Total:</td>
+                <td class="text-center"  style="border-bottom: 3px double;"><span>{{ "$%.2f" | format(order.total - order.discount) }}</span></td>
+            </tr>
+        </tfoot>
 	</table>
 </div>
 {% endblock %}

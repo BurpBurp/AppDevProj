@@ -10,6 +10,7 @@ from itsdangerous import BadSignature
 import secrets
 
 import stripe
+import stripe.error
 
 from database_models.UserDBModel import *
 from database_models.CartDBModel import *
@@ -149,15 +150,16 @@ def checkout():
                     'quantity':item.quantity
                 }
         items.append(line_item)
-
     try:
         checkout_session = stripe.checkout.Session.create(
             line_items = items,
-            success_url = url_for('cart.checkout_success',_external=True, token=token),
+            success_url = f"http://127.0.0.1:5000/cart/checkout/success/{token}?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url = url_for('cart.read_cart',_external=True),
             mode = 'payment',
             payment_method_types = ['card', 'paynow', 'grabpay'],
-            customer_email=flask_login.current_user.email
+            customer_email=flask_login.current_user.email,
+            allow_promotion_codes=True,
+            metadata={"token":token}
         )
 
     except Exception as e:
@@ -166,13 +168,15 @@ def checkout():
     return redirect(checkout_session.url)
 
 
-@blueprint.route("/cart/checkout/success/<token>/")
+@blueprint.route("/cart/checkout/success/<token>")
 @flask_login.login_required
 def checkout_success(token):
     try:
         payload = non_timed_serializer.loads(token, salt="Checkout")
     except BadSignature:
         return "Invalid Token"
+
+
 
     if not (order := Order.query.filter_by(token=payload.get("token")).first()):
 
@@ -183,9 +187,17 @@ def checkout_success(token):
 
         cart = user.cart
         if len(cart.cart_items) <= 0:
-            return "Empty Cart"
+            helper_functions.flash_error("Order has no items")
+            return redirect(url_for("order.view_orders"))
 
-        order = Order(user=user,token=payload.get("token"))
+        discount = 0
+        if checkout_id := request.args.get("session_id"):
+            checkout_session = stripe.checkout.Session.retrieve(checkout_id)
+            print(checkout_session)
+            print(checkout_session["total_details"]["amount_discount"])
+            discount = checkout_session["total_details"]["amount_discount"]/100
+
+        order = Order(user=user,token=payload.get("token"),discount=discount)
         db.session.add(order)
         db.session.commit()
         total = 0
@@ -205,4 +217,5 @@ def checkout_success(token):
         create_cart(flask_login.current_user)
 
         helper_functions.flash_success("Success! Checked Out")
+    print("ORDER")
     return render_template("orders/user_order_indiv.html", order=order, new=True)
