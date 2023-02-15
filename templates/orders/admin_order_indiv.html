@@ -82,6 +82,7 @@
 			<th>Price</th>
 			<th>Description</th>
 			<th>Quantity</th>
+            <th>Total</th>
 			<th>Fulfill</th>
 		</tr>
 		{% for item in range((order.order_items | length)) %}
@@ -91,6 +92,7 @@
 			<td>{{ "$%.2f"|format(order.order_items[item].price ) }}</td>
 			<td>{{ order.order_items[item].description }}</td>
 			<td>{{ order.order_items[item].quantity }}</td>
+            <td>{{ "$%.2f"|format(order.order_items[item].price * order.order_items[item].quantity) }}</td>
 			<td>
 				<form id="item_form_{{ order.order_items[item].id }}">
 					<input type="checkbox" name="fulfilled" id="item_fufilled_{{ order.order_items[item].id }}"
@@ -101,6 +103,26 @@
 			</td>
 		</tr>
 		{% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan="4"></td>
+                <td >Sub Total:</td>
+                <td class="text-center" style="border-top: 2px solid black !important;">{{ "$%.2f" | format(order.total) }}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="4"></td>
+                <td >Discount:</td>
+                <td class="text-center" style=" border-bottom: 2px solid black !important">{{ "$%.2f" | format(order.discount) }}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="4"></td>
+                <td >Total:</td>
+                <td class="text-center"  style="border-bottom: 3px double;"><span>{{ "$%.2f" | format(order.total - order.discount) }}</span></td>
+                <td></td>
+            </tr>
+        </tfoot>
 	</table>
 </div>
 {% endblock %}
