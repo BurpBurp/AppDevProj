@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% set active_page = "admin" %}
+{% set subpage = "coupons" %}
+
+{% block head %}
+<title>Index</title>
+{% endblock %}
+
+{% block main %}
+<div class="container">
+  <h1 class="text-center mb-0">Manage Coupons</h1>
+  <a class="btn btn-success ms-auto float-end my-2" href="{{url_for('coupon.add_coupon')}}"><i class="fa fa-plus"></i> Add item</a>
+  <table class="text-center table table-striped">
+    <tr>
+      <th>ID</th>
+      <th>Type</th>
+      <th>Discount</th>
+      <th>Uses</th>
+      <th>Update</th>
+      <th>Delete</th>
+    </tr>
+      {% for i in couponList %}
+          <tr>
+              <td>{{ i["id"] }}</td>
+              <td>{{ "Amount Off" if i["amount_off"] else "Percent Off" }}</td>
+              <td>{{ "$%.2f" | format(i["amount_off"] / 100) if i["amount_off"] else ("%.2f" | format(i["percent_off"])) + "%" }}</td>
+              <td class="text-truncate" style="max-width: 50px">{{ i["times_redeemed"] }}</td>
+              <td><a class="btn btn-warning" href="{{url_for('coupon.edit_coupon', id = i['id'])}}/"><i class="fas fa-edit"></i></a></td>
+              <td><a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#DeleteItem_{{i['id']}}"><i class="fa fa-trash"></i></a></td>
+          </tr>
+          <div class="modal fade" id="DeleteItem_{{i.id}}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" >Delete Item</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <p>Are you sure you want to delete coupon?</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <a class="btn btn-danger" href="{{url_for('coupon.delete_coupons', id=i['id'])}}/">Delete</a>
+                </div>
+              </div>
+            </div>
+          </div>
+      {% endfor %}
+  </table>
+</div>
+
+
+
+
+{% endblock %}
