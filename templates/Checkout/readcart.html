@@ -215,7 +215,7 @@ background-color: #d3d3d3;
                     <h4>No Items in Cart</h4>
                     <hr class="my-4">
                     <div class="text-center">
-                        <a type="button" class="btn btn-primary d-flex py-3 justify-content-center"><h5>Checkout</h5></a>
+                        <a type="button" class="btn btn-primary d-flex py-3 justify-content-center {{ 'disabled' if cart | length == 0 else '' }}"><h5>Checkout</h5></a>
                     </div>
                   {% endif %}
 

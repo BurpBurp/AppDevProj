@@ -72,7 +72,7 @@ $(document).ready(function(){
 				<tr id="order_{{ order.id }}" class="order-item">
 					<td>{{ order.id }}</td>
 					<td>{{ order.user.username }}</td>
-					<td>{{ "$%.2f"|format(order.total) }}</td>
+					<td>{{ "$%.2f"|format(order.total - order.discount) }}</td>
 					<td id="order_status_{{ order.id }}">{{ order.status }}</td>
 					<td><a href="{{ url_for('order.admin_order_indiv',id=order.id, prev=[status]) }}" class="btn btn-primary">Details</a></td>
 					{% if status != "COMPLETED" %}
