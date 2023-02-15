@@ -1,0 +1,142 @@
+<!-- Darwin's Stuff -->
+{% extends 'base.html' %}
+{% set active_page = "admin" %}
+{% set subpage = "coupons" %}
+
+{% block head %}
+<title>Edit Coupon</title>
+{% endblock %}
+
+<script>
+{% block headscript %}
+$(document).ready(function() {
+    $("#add_code").click(function(){
+        new_id = $(".code-input").length
+        var div = $("<div></div>").addClass("form-floating col-md-12 code-input")
+        var input = $(`<input id='codes-${new_id}' name='codes-${new_id}' placeholder='a' required type='text' value></input>`).addClass("form-control form-control-lg")
+        var label = $(`<label for='codes-${new_id}'>Code</label>`)
+        div.append(input)
+        div.append(label)
+        $(this).parent().append(div)
+    })
+
+    $("#remove_code").click(function(){
+        console.log("REMOVING CODE")
+        new_id = $(".code-input").length
+        if (new_id > 0) {
+            $(this).parent().children(".code-input:last").remove()
+        }
+        
+    })
+
+    $(".deactivate").click(function() {
+        code_id = this.value
+        console.log(this.value)
+        $.post({url:"{{ url_for('coupon.deactivate_code') }}"
+            ,data: {"id":code_id},
+            success: function(result){
+                if (result.success) {
+                    flash("Success! Deactivated Code","success")
+                    $(`#span_${code_id}`).css("text-decoration","line-through")
+                    $(`#activate_${code_id}`).removeClass("d-none")
+                    $(`#deactivate_${code_id}`).addClass("d-none")
+                } else {
+                    flash("ERROR! INTERNAL SERVER ERROR (STRIPE ERROR)","error")
+                }
+            }
+        });
+    })
+
+    $(".activate").click(function() {
+        code_id = this.value
+        console.log(this.value)
+        $.post({url:"{{ url_for('coupon.activate_code') }}"
+            ,data: {"id":code_id},
+            success: function(result){
+                if (result.success) {
+                    flash("Success! Activated Code","success")
+                    $(`#span_${code_id}`).css("text-decoration","none")
+                    $(`#deactivate_${code_id}`).removeClass("d-none")
+                    $(`#activate_${code_id}`).addClass("d-none")
+                } else {
+                    flash("ERROR! INTERNAL SERVER ERROR (STRIPE ERROR)","error")
+                }
+            }
+        });
+    })
+})
+{% endblock %}
+</script>
+
+{% block main %}
+<div class="container justify-content-center min-vh-100 d-flex align-items-center">
+    <div class="container w-auto">
+        <div class="row mb-3">
+        <a href="{{ url_for('coupon.view_coupons')}}" class="offset-md-3 col-auto btn btn-secondary" >< Back To Coupons</a>
+        </div>
+        <div class="row justify-content-center">
+            <form action="#" method="post" class="col-md-6 shadow-lg rounded p-5" novalidate>
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group row g-3">
+                    <legend>Edit Coupon</legend>
+
+                    <div class="form-floating col-md-12">
+                        {% if form.name.errors %}
+                            {{ form.name(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.name(class="form-control form-control-lg",placeholder="a") }}
+                        {% endif %}
+                        {{ form.name.label }}
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input type="text" class="disabled form-control form-control-lg" value='{{ "Amount Off" if coupon["amount_off"] else "Percent Off" }}' id="type" disabled>
+                        <label for="type">Discount Type</label>
+                    </div>
+
+                    <div class="form-floating col-md-12">
+                        <input type="text" id="amount" class="disabled form-control form-control-lg" value='{{ "$%.2f" | format(coupon["amount_off"] / 100) if coupon["amount_off"] else ("%.2f" | format(coupon["percent_off"])) + "%" }}' disabled>
+                        <label for="amount">Discount Amount</label>
+                    </div>
+                    <fieldset class="form-group row g-3 px-0">
+                        <legend>Coupon Codes</legend>
+                        <legend>Current Codes</legend>
+                        {% for code in codes %}
+                            <div class="col-md-9"><span style='{{ "text-decoration: line-through;" if not code["active"] else "" }}' id="span_{{ code['id'] }}">{{ code["code"] }}</span></div>
+                            <button class="btn btn-danger col-md-3 {{ 'd-none' if not code['active'] else ''}} deactivate" type="button" value="{{ code['id'] }}" id="deactivate_{{ code['id'] }}">Deactivate</button>
+                            <button class="btn btn-success col-md-3 {{ 'd-none' if code['active'] else ''}} activate" type="button" value="{{ code['id'] }}" id="activate_{{ code['id'] }}">Activate</button>
+                        {% endfor %}
+                        <legend>Add Codes</legend>
+                        <button class="btn btn-secondary w-auto col-auto ms-2" type="button" id="add_code"><i class="fa fa-plus"></i> Add Code</button>
+                        <button class="btn btn-secondary w-auto col-auto ms-2" type="button" id="remove_code"><i class="fa fa-minus"></i> Remove Code </button>
+                        {% for nested in form.codes %}
+                            <div class="form-floating col-md-12 code-input">
+                                {% if nested.errors %}
+                                    {{ nested(class="form-control form-control-lg is-invalid",placeholder="a") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in nested.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ nested(class="form-control form-control-lg",placeholder="a") }}
+                                {% endif %}
+                                {{ nested.label }}
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+                    
+                </fieldset>
+                <fieldset class="row mt-3 justify-content-end g-3 px-0">
+                    <div class="col-12"><button type="submit" class="btn btn-primary float-end">Update Coupon</button></div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
