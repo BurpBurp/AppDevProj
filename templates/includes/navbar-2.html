@@ -68,7 +68,7 @@
                                 <li><a class="dropdown-item {{ 'active' if subpage == 'users' else '' }}" href="{{ url_for('admin.admin') }}">User Management</a></li>
                                 <li><a class="dropdown-item {{ 'active' if subpage == 'DisplayInventory' else '' }}" href="{{ url_for('InventoryManagement.ManageInventory') }}">Inventory Management</a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('order.admin_orders') }}">Order Management</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('contact.contact_list') }}">Contact Us Management</a></li>
+                                <li><a class="dropdown-item {{ 'active' if subpage == 'coupons' else '' }}" href="{{ url_for('coupon.view_coupons') }}">Coupon Management</a></li>
                             </ul>
                         </li>
                     {% endif %}

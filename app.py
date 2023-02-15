@@ -15,6 +15,7 @@ import routes.ForgetPassword as forgot
 import routes.totp as totp
 import routes.orders as orders
 import routes.store as store
+import routes.coupons as coupons
 
 from database_models.UserDBModel import User
 from database_models.CartDBModel import Cart
@@ -81,6 +82,7 @@ def register_blueprints(app: Flask):
     app.register_blueprint(totp.blueprint)
     app.register_blueprint(store.blueprint)
     app.register_blueprint(orders.blueprint)
+    app.register_blueprint(coupons.blueprint)
 
 def setup_database(app: Flask):
     with app.app_context():
