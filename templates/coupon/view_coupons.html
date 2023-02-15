@@ -13,6 +13,7 @@
   <table class="text-center table table-striped">
     <tr>
       <th>ID</th>
+      <th>Name</th>
       <th>Type</th>
       <th>Discount</th>
       <th>Uses</th>
@@ -22,6 +23,7 @@
       {% for i in couponList %}
           <tr>
               <td>{{ i["id"] }}</td>
+              <td>{{ i["name"] }}</td>
               <td>{{ "Amount Off" if i["amount_off"] else "Percent Off" }}</td>
               <td>{{ "$%.2f" | format(i["amount_off"] / 100) if i["amount_off"] else ("%.2f" | format(i["percent_off"])) + "%" }}</td>
               <td class="text-truncate" style="max-width: 50px">{{ i["times_redeemed"] }}</td>

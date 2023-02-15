@@ -90,7 +90,7 @@ $(document).ready(function() {
                         {% endif %}
                         {{ form.coupon_discount.label(id="coupon_discount_label") }}
                     </div>
-                    <fieldset class="form-group row g-3">
+                    <fieldset class="form-group row g-3 px-0">
                         <legend>Coupon Codes</legend>
                         <button class="btn btn-secondary w-auto col-auto ms-2" type="button" id="add_code"><i class="fa fa-plus"></i> Add Code</button>
                         <button class="btn btn-secondary w-auto col-auto ms-2" type="button" id="remove_code"><i class="fa fa-minus"></i> Remove Code </button>
@@ -112,8 +112,8 @@ $(document).ready(function() {
                     </fieldset>
                     
                 </fieldset>
-                <fieldset class="row mt-3 justify-content-end g-3">
-                    <div class="col-12"><button type="submit" class="btn btn-primary float-end me-3">Add Coupon</button></div>
+                <fieldset class="row mt-3 justify-content-end g-3 px-0">
+                    <div class="col-12"><button type="submit" class="btn btn-primary float-end">Add Coupon</button></div>
                 </fieldset>
             </form>
         </div>

@@ -1,10 +1,10 @@
-from flask import Blueprint, session, render_template, request, redirect, url_for
+from flask import Blueprint, session, render_template, request, redirect, url_for, jsonify
 from database_models.CartDBModel import *
 from forms.AddItemForm import *
 import flask_login
 import stripe
 import stripe.error
-from forms.CouponForm import AddCoupon
+from forms.CouponForm import AddCoupon, EditCoupon
 import helper_functions
 
 blueprint = Blueprint("coupon", __name__, template_folder="templates")
@@ -73,12 +73,68 @@ def delete_coupons(id):
 @flask_login.login_required
 @helper_functions.admin_required
 def edit_coupon(id):
+    form = EditCoupon()
     try:
         coupon = stripe.Coupon.retrieve(id)
-        print(coupon)
+        codes = stripe.PromotionCode.list(coupon=id)
     except stripe.error.StripeError:
         helper_functions.flash_error("Coupon Not FOund")
         return redirect(url_for("coupon.view_coupons"))
     if request.method == "GET":
-        return "FOUND COUPON"
+        form.name.data = coupon["name"]
+        return render_template("coupon/edit_coupon.html", coupon=coupon, codes=codes["data"], form=form)
+    elif request.method == "POST":
+        if form.validate_on_submit():
+            print("VALIDATED")
+            stripe.Coupon.modify(id,name=form.name.data)
+            print("NAMECHANGED")
+            print(form.codes.data)
+            if len(form.codes.data) > 0:
+                print("MORE THAN ONE CODE")
+                codes_in_use = []
 
+                for code in form.codes.data:
+                    retrived_code = stripe.PromotionCode.list(code=code,active=True)
+                    print(retrived_code)
+                    if len(retrived_code["data"]) > 0:
+                        codes_in_use.append(code)
+
+                if len(codes_in_use) > 0:
+                    for code in codes_in_use:
+                        helper_functions.flash_error(f"Code {code} in use")
+                    return render_template("coupon/edit_coupon.html", coupon=coupon, codes=codes["data"], form=form)
+
+                for code in form.codes.data:
+                    stripe.PromotionCode.create(coupon=coupon["id"], code=code)
+                return redirect(url_for("coupon.view_coupons"))
+            else:
+                return redirect(url_for("coupon.view_coupons"))
+        return render_template("coupon/edit_coupon.html", coupon=coupon, codes=codes["data"], form=form)
+
+
+@blueprint.route("/coupon/activate_code", methods=["POST"])
+def activate_code():
+    try:
+        if id := request.form.get("id"):
+            stripe.PromotionCode.modify(
+              id,
+              active=True
+            )
+            return jsonify(success=1)
+    except stripe.error.StripeError:
+        pass
+    return jsonify(success=0)
+
+
+@blueprint.route("/coupon/deactivate_code", methods=["POST"])
+def deactivate_code():
+    try:
+        if id := request.form.get("id"):
+            stripe.PromotionCode.modify(
+              id,
+              active=False
+            )
+            return jsonify(success=1)
+    except stripe.error.StripeError:
+        pass
+    return jsonify(success=0)
