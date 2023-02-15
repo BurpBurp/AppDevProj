@@ -62,11 +62,12 @@ def add_to_cart_ajax():
         helper_functions.flash_error("Item Does Not Exist")
         return redirect(url_for("index.index"))
     if request.method == "POST":
-        if cart_item := Cart_Item.query.filter_by(Item_id=item.id).first():
+        if cart_item := Cart_Item.query.filter_by(Item_id=item.id,cart_id=flask_login.current_user.cart.id).first():
             cart_item.quantity += form.quantity.data
             db.session.commit()
         else:
             cart_item = Cart_Item(cart=flask_login.current_user.cart,item=item,quantity=form.quantity.data)
+            print(cart_item)
             db.session.add(cart_item)
             db.session.commit()
         print(len(flask_login.current_user.cart.cart_items))
