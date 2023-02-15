@@ -28,7 +28,7 @@
 			{% for order in orders %}
 				<tr id="order_{{ order.id }}">
 					<td>{{ order.id }}</td>
-					<td>{{ "$%.2f"|format(order.total) }}</td>
+					<td>{{ "$%.2f"|format(order.total - order.discount) }}</td>
 					<td id="order_status_{{ order.id }}">{{ order.status }}</td>
 					<td><a href="{{ url_for('order.user_order_indiv',id=order.id, prev=[status]) }}" class="btn btn-primary">Details</a></td>
 				</tr>
