@@ -10,6 +10,15 @@ Link expires in 10 minutes.
 
 Due to NYP wifi firewall issues, emails cannot be sent on school wifi.
 
+requirements.txt file may not have flask_session module
+In case flask_session is not found, do
+
+```pip install flask_session```
+
+To install all required modules, do
+
+```pip install -r requirements.txt```
+
 Admin Credentials
 Username: admin
 Password: admin
