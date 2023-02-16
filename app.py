@@ -49,7 +49,7 @@ def init_mail_service(app: Flask):
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USERNAME'] = 'khwaresappdev@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'akfxhtnsjvdokqez'
+    app.config['MAIL_PASSWORD'] = 'ofqhvddjprartdua'
     app.config['MAIL_USE_TLS'] = True
     mail.mail.init_app(app)
 
